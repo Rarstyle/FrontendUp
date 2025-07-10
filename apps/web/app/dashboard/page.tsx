@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { auth } from '../../lib/firebase';
 
 export default function DashboardPage() {
   const router = useRouter();
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      router.replace("/slots");
+      router.replace('/slots');
     } else {
-      router.replace("/login");
+      router.replace('/login');
     }
   }, [router]);
 

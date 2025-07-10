@@ -2,8 +2,11 @@
 
 import { Inter } from 'next/font/google';
 import Link from 'next/link';
-import { auth } from '@/lib/firebase';
-import '@/styles/globals.css';
+import { useState, useEffect } from 'react';
+import { auth } from '../lib/firebase';
+import { onAuthStateChanged, User, signOut } from 'firebase/auth';
+import { usePathname } from 'next/navigation';
+import '@/shared/styles/globals.css';
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -12,7 +15,36 @@ const inter = Inter({
 });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const user = auth.currentUser;
+  const [user, setUser] = useState<User | null>(null);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!auth) {
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    if (!auth) {
+      return;
+    }
+
+    try {
+      await signOut(auth);
+      // Пользователь будет автоматически перенаправлен на главную страницу
+    } catch (error) {
+      console.error('Ошибка при выходе:', error);
+    }
+  };
+
+  // Проверяем, находится ли пользователь в личном кабинете
+  const isInDashboard = pathname?.startsWith('/slots') || pathname?.startsWith('/slot/');
+
   return (
     <html lang="ru" className={inter.className}>
       <body className="min-h-screen flex flex-col">
@@ -48,6 +80,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     Начать бесплатно
                   </Link>
                 </>
+              )}
+              {/* Кнопка выхода появляется только в кабинете */}
+              {user && isInDashboard && (
+                <button
+                  onClick={handleSignOut}
+                  className="text-gray-600 hover:text-gray-900 hover:underline"
+                >
+                  Выйти
+                </button>
               )}
             </nav>
           </div>

@@ -14,20 +14,36 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Debug: Check if config is loaded
+// Check if config is loaded
 if (!firebaseConfig.apiKey) {
   console.error('Firebase API key is missing. Check your .env.local file.');
 }
 
 // Initialize Firebase app (singleton)
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const provider = new GoogleAuthProvider();
 
-// Configure Google provider
-provider.setCustomParameters({
-  prompt: 'select_account'
-});
+// Only initialize auth in browser
+let auth: ReturnType<typeof getAuth> | undefined;
+let provider: GoogleAuthProvider | undefined;
+
+if (typeof window !== 'undefined') {
+  auth = getAuth(app);
+  provider = new GoogleAuthProvider();
+  
+  // Configure Google provider with additional scopes and parameters
+  provider.addScope('email');
+  provider.addScope('profile');
+  provider.setCustomParameters({
+    prompt: 'select_account',
+    access_type: 'offline'
+  });
+  
+  // Google provider configured successfully
+} else {
+  // Firebase auth not initialized on server side
+}
+
+export { auth, provider };
 
 // Only initialize analytics in browser (to avoid SSR issues)
 //export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;

@@ -1,31 +1,53 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
-import { useLocalSlots, Slot } from "@/hooks/useLocalSlots";
-import SlotForm, { SlotFormData } from "@/components/SlotForm";
-
-export const metadata = {
-  title: "Редактировать слот – AdBrain Lab",
-};
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useAuthGuard } from '@/shared/hooks/useAuthGuard';
+import { useLocalSlots } from '@/shared/hooks/useLocalSlots';
+import SlotForm from '@/features/slot-management/ui/SlotForm';
+import type { SlotFormData } from '@/features/slot-management/ui/SlotForm';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../../../lib/firebase';
 
 export default function EditSlotPage() {
   useAuthGuard();
   const { id } = useParams() as { id: string };
   const router = useRouter();
   const { slots, updateSlot, deleteSlot } = useLocalSlots();
-  const slot = slots.find((s) => s.id === id);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      // Пользователь будет автоматически перенаправлен на главную страницу
+    } catch (error) {
+      console.error('Ошибка при выходе:', error);
+    }
+  };
 
   useEffect(() => {
+    // Don't redirect immediately if slots are still loading
+    if (slots.length === 0) {
+      return;
+    }
+
+    const slot = slots.find((s) => s.id === id);
     if (!slot || slot.demo) {
       // Redirect if slot not found or is a demo (not editable)
-      router.replace("/slots");
+      router.replace('/slots');
+    } else {
+      setIsLoading(false);
     }
-  }, [slot, router]);
+  }, [slots, id, router]);
 
-  if (!slot || slot.demo) {
+  // Show loading while slots are being loaded
+  if (slots.length === 0 || isLoading) {
     return <div className="py-8 px-5">Загрузка...</div>;
+  }
+
+  const slot = slots.find((s) => s.id === id);
+  if (!slot || slot.demo) {
+    return <div className="py-8 px-5">Слот не найден или недоступен для редактирования</div>;
   }
 
   const handleUpdate = async (data: SlotFormData) => {
@@ -60,23 +82,18 @@ export default function EditSlotPage() {
   };
 
   const handleDelete = () => {
-    const confirm = window.confirm("Удалить слот? Это действие необратимо.");
+    const confirm = window.confirm('Удалить слот? Это действие необратимо.');
     if (confirm) {
       deleteSlot(id);
-      router.replace("/slots");
+      router.replace('/slots');
     }
   };
 
   return (
     <div className="max-w-lg mx-auto py-8 px-5">
-      <h1 className="text-2xl font-bold text-primary mb-6">
-        Редактировать слот
-      </h1>
+      <h1 className="text-2xl font-bold text-primary mb-6">Редактировать слот</h1>
       <SlotForm onSubmit={handleUpdate} initialSlot={slot} />
-      <button
-        onClick={handleDelete}
-        className="mt-6 text-red-600 hover:underline text-sm"
-      >
+      <button onClick={handleDelete} className="mt-6 text-red-600 hover:underline text-sm">
         Удалить слот
       </button>
     </div>

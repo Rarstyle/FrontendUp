@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { auth, provider } from '@/lib/firebase';
+import { auth, provider } from '../../lib/firebase';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -20,23 +20,40 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
+    if (!auth) {
+      setError('Firebase не инициализирован. Обновите страницу.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Try sign in with email/password
-      await signInWithEmailAndPassword(auth, email, password);
-      router.replace('/dashboard');
+      // First try to create a new account (auto sign-up)
+      await createUserWithEmailAndPassword(auth, email, password);
+      router.push('/slots');
     } catch (err: any) {
-      if (err.code === 'auth/user-not-found') {
-        // If no user, create a new one (auto sign-up)
+      if (err.code === 'auth/email-already-in-use') {
+        // User already exists, try to sign in
         try {
-          await createUserWithEmailAndPassword(auth, email, password);
-          router.replace('/dashboard');
-        } catch (err2: any) {
-          setError('Ошибка при регистрации: ' + err2.message);
+          await signInWithEmailAndPassword(auth, email, password);
+          router.push('/slots');
+        } catch (signInErr: any) {
+          if (signInErr.code === 'auth/wrong-password') {
+            setError(
+              'Аккаунт с таким email уже существует, но пароль неверный. Проверьте пароль или используйте "Забыли пароль?".'
+            );
+          } else if (signInErr.code === 'auth/user-not-found') {
+            setError('Пользователь не найден. Проверьте email.');
+          } else {
+            setError('Ошибка входа: ' + signInErr.message);
+          }
         }
-      } else if (err.code === 'auth/wrong-password') {
-        setError('Неверный пароль. Попробуйте ещё раз.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Пароль должен содержать минимум 6 символов.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Неверный формат email.');
       } else {
-        setError('Ошибка: ' + err.message);
+        setError('Ошибка при регистрации: ' + err.message);
       }
     } finally {
       setLoading(false);
@@ -45,17 +62,39 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setError(null);
+    setLoading(true);
+
+    if (!auth || !provider) {
+      setError('Firebase не инициализирован. Обновите страницу.');
+      setLoading(false);
+      return;
+    }
+
     try {
       await signInWithPopup(auth, provider);
-      router.replace('/dashboard');
+      router.push('/slots');
     } catch (err: any) {
-      setError('Ошибка входа через Google: ' + err.message);
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError('Вход через Google был отменен.');
+      } else if (err.code === 'auth/popup-blocked') {
+        setError(
+          'Всплывающее окно было заблокировано браузером. Разрешите всплывающие окна для этого сайта.'
+        );
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError('Домен не авторизован для Google OAuth. Обратитесь к администратору.');
+      } else if (err.code === 'auth/argument-error') {
+        setError('Ошибка конфигурации Google OAuth. Проверьте настройки Firebase.');
+      } else {
+        setError('Ошибка входа через Google: ' + err.message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="max-w-md mx-auto py-12 px-5">
-      <h1 className="text-2xl font-bold text-center mb-8">Войти в AdBrain Lab</h1>
+      <h1 className="text-2xl font-bold text-center mb-8">Войти или зарегистрироваться</h1>
       <form onSubmit={handleEmailLogin} className="bg-base-50 p-6 rounded shadow-sm">
         <div className="mb-4">
           <label htmlFor="email" className="block text-base-900 font-medium mb-1">
@@ -89,13 +128,14 @@ export default function LoginPage() {
           className="w-full bg-accent text-white py-2 px-4 rounded font-medium hover:opacity-90 disabled:opacity-50"
           disabled={loading}
         >
-          {loading ? 'Вход...' : 'Войти'}
+          {loading ? 'Вход...' : 'Войти / Зарегистрироваться'}
         </button>
       </form>
       <div className="text-center my-4 text-base-900">или</div>
       <button
         onClick={handleGoogleLogin}
-        className="w-full flex items-center justify-center bg-white border border-gray-300 text-base-900 py-2 px-4 rounded hover:bg-gray-50"
+        className="w-full flex items-center justify-center bg-white border border-gray-300 text-base-900 py-2 px-4 rounded hover:bg-gray-50 disabled:opacity-50"
+        disabled={loading}
       >
         <svg className="h-5 w-5 mr-2" viewBox="0 0 48 48">
           <path
@@ -115,7 +155,7 @@ export default function LoginPage() {
             fill="#3b78e7"
           />
         </svg>
-        Войти через Google
+        {loading ? 'Вход...' : 'Войти через Google'}
       </button>
     </div>
   );

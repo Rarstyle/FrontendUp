@@ -1,13 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
-import { useLocalSlots, Slot } from "@/hooks/useLocalSlots";
-
-export const metadata = {
-  title: "Детали слота – AdBrain Lab",
-};
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAuthGuard } from '@/shared/hooks/useAuthGuard';
+import { useLocalSlots, Slot } from '@/shared/hooks/useLocalSlots';
 
 export default function SlotDetailPage() {
   useAuthGuard();
@@ -15,49 +12,55 @@ export default function SlotDetailPage() {
   const router = useRouter();
   const { slots } = useLocalSlots();
   const [slot, setSlot] = useState<Slot | undefined>();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const found = slots.find((s) => s.id === id);
+    // Don't redirect immediately if slots are still loading
+    if (slots.length === 0) {
+      return;
+    }
+
+    const found = slots.find((s: Slot) => s.id === id);
     if (!found) {
-      // If slot not found (e.g., deleted or bad URL), redirect to dashboard
-      router.replace("/slots");
+      // If slot not found (e.g., deleted or bad URL), redirect to slots
+      router.replace('/slots');
     } else {
       setSlot(found);
+      setIsLoading(false);
     }
   }, [id, slots, router]);
+
+  // Show loading while slots are being loaded
+  if (slots.length === 0 || isLoading) {
+    return <div className="py-8 px-5">Загрузка...</div>;
+  }
 
   if (!slot) {
     return <div className="py-8 px-5">Загрузка...</div>;
   }
 
-  const isCompleted = slot.status === "completed";
+  const isCompleted = slot.status === 'completed';
   const winner = slot.winnerVariant;
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-5 text-base-900">
-      <a
-        href="/slots"
-        className="text-primary hover:underline mb-4 inline-block"
-      >
+      <a href="/slots" className="text-primary hover:underline mb-4 inline-block">
         ← Все слоты
       </a>
       <h1 className="text-2xl font-bold text-primary mb-4">{slot.name}</h1>
       <div className="mb-6">
         <div>
-          <strong>Платформа:</strong>{" "}
-          {slot.platform === "vk" ? "VK Ads" : "Яндекс Директ"}
+          <strong>Платформа:</strong> {slot.platform === 'vk' ? 'VK Ads' : 'Яндекс Директ'}
         </div>
         <div>
           <strong>Вариаций:</strong> {slot.variations}
         </div>
         <div>
-          <strong>Статус:</strong>{" "}
+          <strong>Статус:</strong>{' '}
           {isCompleted ? (
-            <span className="bg-success text-white py-1 px-2 rounded text-sm">
-              Завершён
-            </span>
+            <span className="bg-success text-white py-1 px-2 rounded text-sm">Завершён</span>
           ) : (
-            "В процессе"
+            'В процессе'
           )}
         </div>
       </div>
@@ -66,7 +69,7 @@ export default function SlotDetailPage() {
           <img
             src={slot.image}
             alt="Креатив"
-            className="max-w-full h-auto rounded"
+            className="max-w-md h-auto rounded shadow-sm border"
           />
         </div>
       ) : null}
@@ -87,16 +90,15 @@ export default function SlotDetailPage() {
           {/* Explanation text of why the winner won */}
           <p>
             {slot.explanation ||
-              "Вариант " +
+              'Вариант ' +
                 winner +
-                " получил значительно более высокий CTR благодаря более привлекательному изображению и чётко сформулированному сообщению. Рекомендуем в дальнейшем использовать подобные элементы для повышения эффективности рекламных кампаний."}
+                ' получил значительно более высокий CTR благодаря более привлекательному изображению и чётко сформулированному сообщению. Рекомендуем в дальнейшем использовать подобные элементы для повышения эффективности рекламных кампаний.'}
           </p>
           {/* TODO: Визуализировать результаты с помощью Recharts (например, график CTR по вариациям) */}
         </div>
       ) : (
         <p className="mb-8">
-          ⏳ Тест ещё выполняется. Результаты и объяснения будут доступны после
-          завершения.
+          ⏳ Тест ещё выполняется. Результаты и объяснения будут доступны после завершения.
         </p>
       )}
       {!slot.demo && (

@@ -1,13 +1,10 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
-import { useLocalSlots } from "@/hooks/useLocalSlots";
-import SlotForm, { SlotFormData } from "@/components/SlotForm";
-
-export const metadata = {
-  title: "Новый слот – AdBrain Lab",
-};
+import { useRouter } from 'next/navigation';
+import { useAuthGuard } from '@/shared/hooks/useAuthGuard';
+import { useLocalSlots } from '@/shared/hooks/useLocalSlots';
+import SlotForm from '@/features/slot-management/ui/SlotForm';
+import type { SlotFormData } from '@/features/slot-management/ui/SlotForm';
 
 export default function NewSlotPage() {
   useAuthGuard();
@@ -28,8 +25,8 @@ export default function NewSlotPage() {
           platform: data.platform,
           text: data.text,
           variations: data.variations,
-          image: base64Image || "",
-          status: "running",
+          image: base64Image || '',
+          status: 'running',
         });
         router.replace(`/slot/${newId}`);
       };
@@ -39,9 +36,7 @@ export default function NewSlotPage() {
 
   return (
     <div className="max-w-lg mx-auto py-8 px-5">
-      <h1 className="text-2xl font-bold text-primary mb-6">
-        Создать новый слот
-      </h1>
+      <h1 className="text-2xl font-bold text-primary mb-6">Создать новый слот</h1>
       <SlotForm onSubmit={handleCreate} />
     </div>
   );

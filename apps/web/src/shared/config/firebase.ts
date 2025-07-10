@@ -15,6 +15,13 @@ const firebaseConfig = {
 };
 
 // Debug: Check if config is loaded
+console.log('Firebase config check:', {
+  hasApiKey: !!firebaseConfig.apiKey,
+  hasAuthDomain: !!firebaseConfig.authDomain,
+  hasProjectId: !!firebaseConfig.projectId,
+  projectId: firebaseConfig.projectId
+});
+
 if (!firebaseConfig.apiKey) {
   console.error('Firebase API key is missing. Check your .env.local file.');
 }
@@ -28,4 +35,6 @@ export const provider = new GoogleAuthProvider();
 // Configure Google provider
 provider.setCustomParameters({
   prompt: 'select_account'
-}); 
+});
+
+console.log('Firebase initialized successfully'); 
