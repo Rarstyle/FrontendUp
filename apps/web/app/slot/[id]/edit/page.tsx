@@ -6,8 +6,6 @@ import { useAuthGuard } from '@/shared/hooks/useAuthGuard';
 import { useLocalSlots } from '@/shared/hooks/useLocalSlots';
 import SlotForm from '@/features/slot-management/ui/SlotForm';
 import type { SlotFormData } from '@/features/slot-management/ui/SlotForm';
-import { signOut } from 'firebase/auth';
-import { auth } from '../../../../lib/firebase';
 
 export default function EditSlotPage() {
   useAuthGuard();
@@ -15,15 +13,6 @@ export default function EditSlotPage() {
   const router = useRouter();
   const { slots, updateSlot, deleteSlot } = useLocalSlots();
   const [isLoading, setIsLoading] = useState(true);
-
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      // Пользователь будет автоматически перенаправлен на главную страницу
-    } catch (error) {
-      console.error('Ошибка при выходе:', error);
-    }
-  };
 
   useEffect(() => {
     // Don't redirect immediately if slots are still loading
@@ -47,7 +36,11 @@ export default function EditSlotPage() {
 
   const slot = slots.find((s) => s.id === id);
   if (!slot || slot.demo) {
-    return <div className="py-8 px-5">Слот не найден или недоступен для редактирования</div>;
+    return (
+      <div className="py-8 px-5">
+        Слот не найден или недоступен для редактирования
+      </div>
+    );
   }
 
   const handleUpdate = async (data: SlotFormData) => {
@@ -91,9 +84,14 @@ export default function EditSlotPage() {
 
   return (
     <div className="max-w-lg mx-auto py-8 px-5">
-      <h1 className="text-2xl font-bold text-primary mb-6">Редактировать слот</h1>
+      <h1 className="text-2xl font-bold text-primary mb-6">
+        Редактировать слот
+      </h1>
       <SlotForm onSubmit={handleUpdate} initialSlot={slot} />
-      <button onClick={handleDelete} className="mt-6 text-red-600 hover:underline text-sm">
+      <button
+        onClick={handleDelete}
+        className="mt-6 text-red-600 hover:underline text-sm"
+      >
         Удалить слот
       </button>
     </div>

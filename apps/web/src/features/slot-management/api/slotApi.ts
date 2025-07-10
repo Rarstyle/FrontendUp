@@ -11,7 +11,7 @@ import {
   orderBy,
   serverTimestamp 
 } from 'firebase/firestore';
-import { db, auth } from '../../../lib/firebase';
+import { db, auth } from '../../../../lib/firebase';
 import { Slot } from '@/entities/slot/model/types';
 
 const SLOTS_COLLECTION = 'slots';

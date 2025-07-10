@@ -1,43 +1,50 @@
-"use client";
+'use client';
 
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 // Reusable Zod schemas for slot form
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png"];
+const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png'];
 
-// Schema for creating a slot (image required)
+// Schema for creating a new slot
 const SlotSchema = z.object({
   name: z
     .string()
-    .nonempty("Введите название слота")
-    .min(3, "Название слишком короткое")
-    .max(60, "Название слишком длинное"),
-  platform: z.enum(["vk", "yandex"], { required_error: "Выберите платформу" }),
+    .nonempty('Введите название слота')
+    .min(3, 'Название слишком короткое')
+    .max(60, 'Название слишком длинное'),
+  platform: z.enum(['vk', 'yandex']),
   text: z
     .string()
-    .nonempty("Введите текст объявления")
-    .max(150, "Текст объявления не должен превышать 150 символов"),
-  variations: z.coerce.number().refine((val) => val === 2 || val === 3, {
-    message: "Выберите 2 или 3 вариации",
-  }),
+    .nonempty('Введите текст объявления')
+    .max(150, 'Текст объявления не должен превышать 150 символов'),
+  variations: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => val === 2 || val === 3, {
+      message: 'Выберите 2 или 3 вариации',
+    }),
   image: z
     .any()
+    .optional()
     .refine(
-      (files) => files instanceof FileList && files.length > 0,
-      "Выберите изображение"
+      (files) => !files || (files instanceof FileList && files.length > 0),
+      'Выберите изображение'
     )
     .refine(
       (files) =>
-        files instanceof FileList &&
-        ACCEPTED_IMAGE_TYPES.includes(files[0]?.type),
-      "Допустимы только JPEG/PNG"
+        !files ||
+        (files instanceof FileList &&
+          ACCEPTED_IMAGE_TYPES.includes(files[0]?.type)),
+      'Допустимы только JPEG/PNG'
     )
     .refine(
-      (files) => files instanceof FileList && files[0]?.size <= MAX_FILE_SIZE,
-      "Размер изображения превышает 2 МБ"
+      (files) =>
+        !files ||
+        (files instanceof FileList && files[0]?.size <= MAX_FILE_SIZE),
+      'Размер изображения превышает 2 МБ'
     ),
 });
 
@@ -45,17 +52,20 @@ const SlotSchema = z.object({
 const SlotSchemaUpdate = z.object({
   name: z
     .string()
-    .nonempty("Введите название слота")
-    .min(3, "Название слишком короткое")
-    .max(60, "Название слишком длинное"),
-  platform: z.enum(["vk", "yandex"], { required_error: "Выберите платформу" }),
+    .nonempty('Введите название слота')
+    .min(3, 'Название слишком короткое')
+    .max(60, 'Название слишком длинное'),
+  platform: z.enum(['vk', 'yandex']),
   text: z
     .string()
-    .nonempty("Введите текст объявления")
-    .max(150, "Текст объявления не должен превышать 150 символов"),
-  variations: z.coerce.number().refine((val) => val === 2 || val === 3, {
-    message: "Выберите 2 или 3 вариации",
-  }),
+    .nonempty('Введите текст объявления')
+    .max(150, 'Текст объявления не должен превышать 150 символов'),
+  variations: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => val === 2 || val === 3, {
+      message: 'Выберите 2 или 3 вариации',
+    }),
   image: z
     .any()
     .optional()
@@ -65,34 +75,45 @@ const SlotSchemaUpdate = z.object({
         return;
       }
       if (!(files instanceof FileList)) {
-        ctx.addIssue({ code: "custom", message: "Неверный формат файла" });
+        ctx.addIssue({ code: 'custom', message: 'Неверный формат файла' });
         return;
       }
       const file = files[0];
       if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-        ctx.addIssue({ code: "custom", message: "Допустимы только JPEG/PNG" });
+        ctx.addIssue({ code: 'custom', message: 'Допустимы только JPEG/PNG' });
       }
       if (file.size > MAX_FILE_SIZE) {
         ctx.addIssue({
-          code: "custom",
-          message: "Размер изображения превышает 2 МБ",
+          code: 'custom',
+          message: 'Размер изображения превышает 2 МБ',
         });
       }
     }),
 });
 
-export type SlotFormData = z.infer<typeof SlotSchema>;
+export type SlotFormData = z.infer<typeof SlotSchema> & {
+  image?: FileList | null;
+};
 
 interface SlotFormProps {
   onSubmit: (data: SlotFormData) => void;
   initialSlot?: {
     name: string;
-    platform: "vk" | "yandex";
+    platform: 'vk' | 'yandex';
     text: string;
     variations: number;
     // image field not included in initial values
   };
 }
+
+// Тип для полей формы (variations — string)
+type SlotFormFields = {
+  name: string;
+  platform: 'vk' | 'yandex';
+  text: string;
+  variations: string;
+  image?: FileList | null;
+};
 
 export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
   const isEdit = !!initialSlot;
@@ -100,8 +121,9 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SlotFormData>({
-    resolver: zodResolver(isEdit ? SlotSchemaUpdate : SlotSchema),
+  } = useForm<SlotFormFields>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(isEdit ? SlotSchemaUpdate : SlotSchema) as any,
     defaultValues: initialSlot
       ? {
           name: initialSlot.name,
@@ -110,13 +132,20 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
           variations: initialSlot.variations.toString(),
         }
       : {
-          platform: "vk",
-          variations: "2",
+          platform: 'vk',
+          variations: '2',
         },
   });
 
+  // Обёртка для преобразования данных
+  const handleFormSubmit = (data: SlotFormFields) => {
+    const parsed = (isEdit ? SlotSchemaUpdate : SlotSchema).parse(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (onSubmit as any)(parsed);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(handleFormSubmit)}>
       <div className="mb-4">
         <label
           htmlFor="slot-name"
@@ -129,7 +158,7 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
           type="text"
           className="w-full border border-gray-300 rounded px-3 py-2"
           placeholder="Например, Тест баннера #1"
-          {...register("name")}
+          {...register('name')}
         />
         {errors.name && (
           <div className="text-red-600 text-sm mt-1">{errors.name.message}</div>
@@ -145,7 +174,7 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
         <select
           id="platform"
           className="w-full border border-gray-300 rounded px-3 py-2"
-          {...register("platform")}
+          {...register('platform')}
         >
           <option value="vk">VK Ads</option>
           <option value="yandex">Яндекс Директ</option>
@@ -168,7 +197,7 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
           maxLength={150}
           className="w-full border border-gray-300 rounded px-3 py-2 h-24"
           placeholder="Введите рекламный текст (до 150 символов)"
-          {...register("text")}
+          {...register('text')}
         />
         {errors.text && (
           <div className="text-red-600 text-sm mt-1">{errors.text.message}</div>
@@ -183,7 +212,7 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
           type="file"
           accept="image/jpeg,image/png"
           className="block w-full text-base-900"
-          {...register("image")}
+          {...register('image')}
         />
         {errors.image && (
           <div className="text-red-600 text-sm mt-1">
@@ -200,7 +229,7 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
             <input
               type="radio"
               value="2"
-              {...register("variations")}
+              {...register('variations')}
               className="mr-1"
             />
             2 вариации
@@ -209,7 +238,7 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
             <input
               type="radio"
               value="3"
-              {...register("variations")}
+              {...register('variations')}
               className="mr-1"
             />
             3 вариации
@@ -225,7 +254,7 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
         type="submit"
         className="bg-accent text-white font-medium px-4 py-2 rounded hover:opacity-90"
       >
-        {isEdit ? "Сохранить" : "Создать"}
+        {isEdit ? 'Сохранить' : 'Создать'}
       </button>
     </form>
   );

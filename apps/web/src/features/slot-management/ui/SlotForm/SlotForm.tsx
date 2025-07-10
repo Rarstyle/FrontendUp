@@ -15,7 +15,7 @@ const SlotSchema = z.object({
     .nonempty('Введите название слота')
     .min(3, 'Название слишком короткое')
     .max(60, 'Название слишком длинное'),
-  platform: z.enum(['vk', 'yandex'], { required_error: 'Выберите платформу' }),
+  platform: z.enum(['vk', 'yandex']),
   text: z
     .string()
     .nonempty('Введите текст объявления')
@@ -25,9 +25,14 @@ const SlotSchema = z.object({
   }),
   image: z
     .any()
-    .refine((files) => files instanceof FileList && files.length > 0, 'Выберите изображение')
     .refine(
-      (files) => files instanceof FileList && ACCEPTED_IMAGE_TYPES.includes(files[0]?.type),
+      (files) => files instanceof FileList && files.length > 0,
+      'Выберите изображение'
+    )
+    .refine(
+      (files) =>
+        files instanceof FileList &&
+        ACCEPTED_IMAGE_TYPES.includes(files[0]?.type),
       'Допустимы только JPEG/PNG'
     )
     .refine(
@@ -43,7 +48,7 @@ const SlotSchemaUpdate = z.object({
     .nonempty('Введите название слота')
     .min(3, 'Название слишком короткое')
     .max(60, 'Название слишком длинное'),
-  platform: z.enum(['vk', 'yandex'], { required_error: 'Выберите платформу' }),
+  platform: z.enum(['vk', 'yandex']),
   text: z
     .string()
     .nonempty('Введите текст объявления')
@@ -76,7 +81,18 @@ const SlotSchemaUpdate = z.object({
     }),
 });
 
-export type SlotFormData = z.infer<typeof SlotSchema>;
+// Тип для полей формы (variations — string)
+type SlotFormFields = {
+  name: string;
+  platform: 'vk' | 'yandex';
+  text: string;
+  variations: string;
+  image?: FileList | null;
+};
+
+export type SlotFormData = z.infer<typeof SlotSchema> & {
+  image?: FileList | null;
+};
 
 interface SlotFormProps {
   onSubmit: (data: SlotFormData) => void;
@@ -96,8 +112,9 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<SlotFormData>({
-    resolver: zodResolver(isEdit ? SlotSchemaUpdate : SlotSchema),
+  } = useForm<SlotFormFields>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(isEdit ? SlotSchemaUpdate : SlotSchema) as any,
     defaultValues: initialSlot
       ? {
           name: initialSlot.name,
@@ -111,14 +128,24 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
         },
   });
 
+  // Обёртка для преобразования данных
+  const handleFormSubmit = (data: SlotFormFields) => {
+    const parsed = (isEdit ? SlotSchemaUpdate : SlotSchema).parse(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (onSubmit as any)(parsed);
+  };
+
   const selectedFile = watch('image');
   const hasFile = selectedFile && selectedFile.length > 0;
   const hasExistingImage = initialSlot?.image && initialSlot.image.length > 0;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(handleFormSubmit)}>
       <div className="mb-4">
-        <label htmlFor="slot-name" className="block font-medium text-base-900 mb-1">
+        <label
+          htmlFor="slot-name"
+          className="block font-medium text-base-900 mb-1"
+        >
           Название слота
         </label>
         <input
@@ -128,10 +155,15 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
           placeholder="Например, Тест баннера #1"
           {...register('name')}
         />
-        {errors.name && <div className="text-red-600 text-sm mt-1">{errors.name.message}</div>}
+        {errors.name && (
+          <div className="text-red-600 text-sm mt-1">{errors.name.message}</div>
+        )}
       </div>
       <div className="mb-4">
-        <label htmlFor="platform" className="block font-medium text-base-900 mb-1">
+        <label
+          htmlFor="platform"
+          className="block font-medium text-base-900 mb-1"
+        >
           Платформа
         </label>
         <select
@@ -143,11 +175,16 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
           <option value="yandex">Яндекс Директ</option>
         </select>
         {errors.platform && (
-          <div className="text-red-600 text-sm mt-1">{errors.platform.message}</div>
+          <div className="text-red-600 text-sm mt-1">
+            {errors.platform.message}
+          </div>
         )}
       </div>
       <div className="mb-4">
-        <label htmlFor="ad-text" className="block font-medium text-base-900 mb-1">
+        <label
+          htmlFor="ad-text"
+          className="block font-medium text-base-900 mb-1"
+        >
           Текст объявления
         </label>
         <textarea
@@ -157,7 +194,9 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
           placeholder="Введите рекламный текст (до 150 символов)"
           {...register('text')}
         />
-        {errors.text && <div className="text-red-600 text-sm mt-1">{errors.text.message}</div>}
+        {errors.text && (
+          <div className="text-red-600 text-sm mt-1">{errors.text.message}</div>
+        )}
       </div>
       <div className="mb-4">
         <label htmlFor="image" className="block font-medium text-base-900 mb-1">
@@ -176,8 +215,8 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
               hasFile
                 ? 'border-green-400 bg-green-50'
                 : hasExistingImage
-                ? 'border-blue-400 bg-blue-50'
-                : 'border-gray-300 hover:border-blue-400'
+                  ? 'border-blue-400 bg-blue-50'
+                  : 'border-gray-300 hover:border-blue-400'
             }`}
           >
             {hasFile ? (
@@ -195,8 +234,12 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <p className="text-sm text-green-700 font-medium">Файл выбран</p>
-                <p className="text-xs text-green-600">{selectedFile[0]?.name}</p>
+                <p className="text-sm text-green-700 font-medium">
+                  Файл выбран
+                </p>
+                <p className="text-xs text-green-600">
+                  {selectedFile[0]?.name}
+                </p>
               </>
             ) : hasExistingImage ? (
               <>
@@ -207,7 +250,9 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
                     className="mx-auto h-16 w-16 object-cover rounded border"
                   />
                 </div>
-                <p className="text-sm text-blue-700 font-medium">Текущее изображение</p>
+                <p className="text-sm text-blue-700 font-medium">
+                  Текущее изображение
+                </p>
                 <p className="text-xs text-blue-600">Нажмите для замены</p>
               </>
             ) : (
@@ -236,20 +281,40 @@ export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
             )}
           </div>
         </div>
-        {errors.image && <div className="text-red-600 text-sm mt-1">{errors.image.message}</div>}
+        {errors.image && (
+          <div className="text-red-600 text-sm mt-1">
+            {errors.image.message}
+          </div>
+        )}
       </div>
       <fieldset className="mb-6">
-        <legend className="block font-medium text-base-900 mb-1">Количество вариаций</legend>
+        <legend className="block font-medium text-base-900 mb-1">
+          Количество вариаций
+        </legend>
         <div className="flex items-center gap-4">
           <label className="inline-flex items-center">
-            <input type="radio" value="2" className="mr-2" {...register('variations')} />2 варианта
+            <input
+              type="radio"
+              value="2"
+              className="mr-2"
+              {...register('variations')}
+            />
+            2 варианта
           </label>
           <label className="inline-flex items-center">
-            <input type="radio" value="3" className="mr-2" {...register('variations')} />3 варианта
+            <input
+              type="radio"
+              value="3"
+              className="mr-2"
+              {...register('variations')}
+            />
+            3 варианта
           </label>
         </div>
         {errors.variations && (
-          <div className="text-red-600 text-sm mt-1">{errors.variations.message}</div>
+          <div className="text-red-600 text-sm mt-1">
+            {errors.variations.message}
+          </div>
         )}
       </fieldset>
       <button
