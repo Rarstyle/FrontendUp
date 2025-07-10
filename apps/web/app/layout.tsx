@@ -2,7 +2,6 @@
 
 import { Inter } from 'next/font/google';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import '@/styles/globals.css';
 
@@ -12,29 +11,19 @@ const inter = Inter({
   fallback: ['system-ui', 'sans-serif'],
 });
 
-// Default SEO metadata for all pages (can be overridden in individual pages)
-// export const metadata = {
-//   title: 'AdBrain Lab – генерация креативов с AI',
-//   description:
-//     'AdBrain Lab – платформа для генерации рекламных креативов и автоматических A/B-тестов (VK Ads, Яндекс Директ)',
-// };
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isDashboard = pathname?.startsWith('/slots') || pathname?.startsWith('/slot');
-  // Check if user is logged in (for conditional nav – single account logic)
   const user = auth.currentUser;
   return (
     <html lang="ru" className={inter.className}>
       <body className="min-h-screen flex flex-col">
-        {/* Header / Navigation */}
-        <header className="bg-base-50 text-base-900">
+        {/* Шапка сайта */}
+        <header className="bg-gray-50 text-gray-900">
           <div className="max-w-6xl mx-auto flex items-center justify-between py-4 px-5">
-            {/* Logo / Brand */}
-            <Link href="/" className="text-xl font-bold text-primary">
+            {/* Логотип / бренд */}
+            <Link href="/" className="text-xl font-bold text-blue-700">
               AdBrain Lab
             </Link>
-            {/* Navigation Links */}
+            {/* Навигационные ссылки */}
             <nav className="flex items-center gap-6">
               <Link href="/about" className="hover:underline">
                 О нас
@@ -42,14 +31,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/pricing" className="hover:underline">
                 Тарифы
               </Link>
-              {/* Show dashboard link if logged in, otherwise login/signup */}
+              {/* Если пользователь залогинен – показываем ссылку в кабинет, иначе – вход/регистрация */}
               {user ? (
-                <>
-                  <Link href="/slots" className="hover:underline">
-                    Кабинет
-                  </Link>
-                  {/* For simplicity, we don't implement full logout here */}
-                </>
+                <Link href="/slots" className="hover:underline">
+                  Кабинет
+                </Link>
               ) : (
                 <>
                   <Link href="/login" className="hover:underline">
@@ -57,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </Link>
                   <Link
                     href="/login"
-                    className="bg-accent text-white font-medium px-4 py-2 rounded hover:opacity-90"
+                    className="bg-[#FF6B00] text-white font-medium px-4 py-2 rounded hover:opacity-90"
                   >
                     Начать бесплатно
                   </Link>
@@ -67,15 +53,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
 
-        {/* Main content */}
+        {/* Основное содержимое страниц */}
         <main className="flex-1">{children}</main>
 
-        {/* Footer */}
-        <footer className="bg-footer text-base-50 py-8 px-5 mt-16">
+        {/* Подвал сайта */}
+        <footer className="relative z-0 bg-gray-900 text-gray-50 py-8 px-5 before:content-[''] before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] before:from-white/10 before:to-transparent before:pointer-events-none before:-z-10">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-sm">© 2025 AdBrain Lab. Все права защищены.</div>
             <div>
-              <Link href="/legal/privacy" className="text-base-50 hover:underline">
+              <Link href="/legal/privacy" className="text-gray-50 hover:underline">
                 Политика конфиденциальности
               </Link>
             </div>

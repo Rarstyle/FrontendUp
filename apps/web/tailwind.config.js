@@ -1,12 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: [
-        './app/layout.tsx',
-        './app/**/*.{js,ts,jsx,tsx}',
-        './components/**/*.{js,ts,jsx,tsx}',
-        './hooks/**/*.{js,ts,jsx,tsx}',
-      ],
-      
+        './app/**/*.{js,jsx,ts,tsx}',
+        './components/**/*.{js,jsx,ts,tsx}',
+        './hooks/**/*.{js,jsx,ts,tsx}',
+    ],
     theme: {
       extend: {
         colors: {
@@ -17,11 +15,9 @@ module.exports = {
           success: '#16A34A',
           'base-50': '#F9FAFB',
           'base-900': '#111827',
-        },
+        },  
       },
     },
-    plugins: [
-      require('tailwindcss-animate'),
-    ],
-  };
+    plugins: [],
+  }
   

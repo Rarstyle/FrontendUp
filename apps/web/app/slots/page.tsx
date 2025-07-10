@@ -1,13 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
-import { useLocalSlots } from "@/hooks/useLocalSlots";
-import { PlusIcon } from "@heroicons/react/24/outline";
-
-export const metadata = {
-  title: "Мои слоты – AdBrain Lab",
-};
+import Link from 'next/link';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
+import { useLocalSlots } from '@/hooks/useLocalSlots';
 
 export default function SlotsPage() {
   useAuthGuard();
@@ -21,28 +16,26 @@ export default function SlotsPage() {
           href="/slot/new"
           className="bg-accent text-white font-medium px-4 py-2 rounded inline-flex items-center hover:opacity-90"
         >
-          <PlusIcon className="h-5 w-5 mr-2" />
+          <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
           Создать слот
         </Link>
       </div>
       {slots.length === 0 ? (
         <p className="text-base-900">
-          Слотов пока нет. Нажмите «Создать слот», чтобы добавить первый
-          A/B-тест.
+          Слотов пока нет. Нажмите «Создать слот», чтобы добавить первый A/B-тест.
         </p>
       ) : (
         <ul className="space-y-4">
           {slots.map((slot) => (
-            <li
-              key={slot.id}
-              className="bg-base-50 p-4 rounded flex items-center justify-between"
-            >
+            <li key={slot.id} className="bg-base-50 p-4 rounded flex items-center justify-between">
               <div>
                 <Link
                   href={`/slot/${slot.id}`}
                   className="text-primary font-medium hover:underline"
                 >
-                  {slot.name}{" "}
+                  {slot.name}{' '}
                   {slot.demo && (
                     <span className="text-xs bg-gray-300 text-gray-800 px-2 py-0.5 rounded ml-1">
                       демо
@@ -50,10 +43,8 @@ export default function SlotsPage() {
                   )}
                 </Link>
                 <div className="text-sm text-base-900">
-                  Платформа:{" "}
-                  {slot.platform === "vk" ? "VK Ads" : "Яндекс Директ"}
-                  {" • "}Статус:{" "}
-                  {slot.status === "completed" ? "Завершён" : "Запущен"}
+                  Платформа: {slot.platform === 'vk' ? 'VK Ads' : 'Яндекс Директ'}
+                  {' • '}Статус: {slot.status === 'completed' ? 'Завершён' : 'Запущен'}
                 </div>
               </div>
               {!slot.demo && (

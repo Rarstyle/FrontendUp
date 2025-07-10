@@ -9,10 +9,6 @@ import {
 } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
-export const metadata = {
-  title: 'Вход – AdBrain Lab',
-};
-
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');

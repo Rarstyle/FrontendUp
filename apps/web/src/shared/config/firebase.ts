@@ -2,7 +2,7 @@
 
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-//import { getAnalytics } from 'firebase/analytics';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -22,12 +22,10 @@ if (!firebaseConfig.apiKey) {
 // Initialize Firebase app (singleton)
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const db = getFirestore(app);
 export const provider = new GoogleAuthProvider();
 
 // Configure Google provider
 provider.setCustomParameters({
   prompt: 'select_account'
-});
-
-// Only initialize analytics in browser (to avoid SSR issues)
-//export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+}); 
