@@ -1,5 +1,10 @@
 'use client';
 
+export const metadata = {
+  title: 'Создать слот – AdBrain Lab',
+  description: 'Создайте новый A/B-тест для рекламных креативов.',
+};
+
 import { useRouter } from 'next/navigation';
 import { useAuthGuard } from '@/shared/hooks/useAuthGuard';
 import { useLocalSlots } from '@/shared/hooks/useLocalSlots';
@@ -36,7 +41,9 @@ export default function NewSlotPage() {
 
   return (
     <div className="max-w-lg mx-auto py-8 px-5">
-      <h1 className="text-2xl font-bold text-primary mb-6">Создать новый слот</h1>
+      <h1 className="text-2xl font-bold text-primary mb-6">
+        Создать новый слот
+      </h1>
       <SlotForm onSubmit={handleCreate} />
     </div>
   );
