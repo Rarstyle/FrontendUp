@@ -12,6 +12,6 @@ export async function generateMetadata({
   };
 }
 
-export default function Page() {
+export default function Page({ params }: { params: { id: string } }) {
   return <EditSlotPageClient />;
 }
