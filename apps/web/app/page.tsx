@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import HomePageClient from './HomePageClient';
 
 // Static metadata for SEO
@@ -8,6 +8,12 @@ export const metadata = {
     'Инструмент для малого бизнеса: генерация креативов и автоматическое A/B-тестирование в VK и Яндекс с объяснимым AI.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function HomePage() {
-  return <HomePageClient />;
+  return (
+    <Suspense>
+      <HomePageClient />
+    </Suspense>
+  );
 }

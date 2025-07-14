@@ -1,5 +1,7 @@
+import React, { Suspense } from 'react';
 import LoginPageClient from './LoginPageClient';
 
+export const dynamic = 'force-dynamic';
 // Static metadata for SEO
 export const metadata = {
   title: 'Войти или зарегистрироваться – NeuroAd',
@@ -8,5 +10,9 @@ export const metadata = {
 };
 
 export default function LoginPage() {
-  return <LoginPageClient />;
+  return (
+    <Suspense>
+      <LoginPageClient />
+    </Suspense>
+  );
 }

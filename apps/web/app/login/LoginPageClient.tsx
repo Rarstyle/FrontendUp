@@ -9,7 +9,11 @@ import {
   AuthError,
 } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { trackLogin, trackFormSubmission, useTimeTracking } from '../../lib/analytics';
+import {
+  trackLogin,
+  trackFormSubmission,
+  useTimeTracking,
+} from '../../lib/analytics';
 import TrackedButton from '../../components/TrackedButton';
 
 export default function LoginPageClient() {
@@ -36,7 +40,7 @@ export default function LoginPageClient() {
     try {
       // First try to create a new account (auto sign-up)
       await createUserWithEmailAndPassword(auth, email, password);
-      trackLogin('email');
+      trackLogin('email', true);
       trackFormSubmission('login_form', true);
       router.push('/slots');
     } catch (err: unknown) {
@@ -45,7 +49,7 @@ export default function LoginPageClient() {
         // User already exists, try to sign in
         try {
           await signInWithEmailAndPassword(auth, email, password);
-          trackLogin('email');
+          trackLogin('email', true);
           trackFormSubmission('login_form', true);
           router.push('/slots');
         } catch (signInErr: unknown) {
@@ -60,16 +64,20 @@ export default function LoginPageClient() {
             setError('Ошибка входа: ' + signInFirebaseError.message);
           }
           trackFormSubmission('login_form', false);
+          trackLogin('email', false, signInFirebaseError.message);
         }
       } else if (firebaseError.code === 'auth/weak-password') {
         setError('Пароль должен содержать минимум 6 символов.');
         trackFormSubmission('login_form', false);
+        trackLogin('email', false, firebaseError.message);
       } else if (firebaseError.code === 'auth/invalid-email') {
         setError('Неверный формат email.');
         trackFormSubmission('login_form', false);
+        trackLogin('email', false, firebaseError.message);
       } else {
         setError('Ошибка при регистрации: ' + firebaseError.message);
         trackFormSubmission('login_form', false);
+        trackLogin('email', false, firebaseError.message);
       }
     } finally {
       setLoading(false);
@@ -88,7 +96,7 @@ export default function LoginPageClient() {
 
     try {
       await signInWithPopup(auth, provider);
-      trackLogin('google');
+      trackLogin('google', true);
       router.push('/slots');
     } catch (err: unknown) {
       const firebaseError = err as AuthError;
@@ -99,12 +107,17 @@ export default function LoginPageClient() {
           'Всплывающее окно было заблокировано браузером. Разрешите всплывающие окна для этого сайта.'
         );
       } else if (firebaseError.code === 'auth/unauthorized-domain') {
-        setError('Домен не авторизован для Google OAuth. Обратитесь к администратору.');
+        setError(
+          'Домен не авторизован для Google OAuth. Обратитесь к администратору.'
+        );
       } else if (firebaseError.code === 'auth/argument-error') {
-        setError('Ошибка конфигурации Google OAuth. Проверьте настройки Firebase.');
+        setError(
+          'Ошибка конфигурации Google OAuth. Проверьте настройки Firebase.'
+        );
       } else {
         setError('Ошибка входа через Google: ' + firebaseError.message);
       }
+      trackLogin('google', false, firebaseError.message);
     } finally {
       setLoading(false);
     }
@@ -112,10 +125,18 @@ export default function LoginPageClient() {
 
   return (
     <div className="max-w-md mx-auto py-12 px-5">
-      <h1 className="text-2xl font-bold text-center mb-8">Войти или зарегистрироваться</h1>
-      <form onSubmit={handleEmailLogin} className="bg-base-50 p-6 rounded shadow-sm">
+      <h1 className="text-2xl font-bold text-center mb-8">
+        Войти или зарегистрироваться
+      </h1>
+      <form
+        onSubmit={handleEmailLogin}
+        className="bg-base-50 p-6 rounded shadow-sm"
+      >
         <div className="mb-4">
-          <label htmlFor="email" className="block text-base-900 font-medium mb-1">
+          <label
+            htmlFor="email"
+            className="block text-base-900 font-medium mb-1"
+          >
             Email
           </label>
           <input
@@ -128,7 +149,10 @@ export default function LoginPageClient() {
           />
         </div>
         <div className="mb-6">
-          <label htmlFor="password" className="block text-base-900 font-medium mb-1">
+          <label
+            htmlFor="password"
+            className="block text-base-900 font-medium mb-1"
+          >
             Пароль
           </label>
           <input
