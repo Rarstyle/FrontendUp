@@ -9,6 +9,8 @@ import {
   AuthError,
 } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { trackLogin, trackFormSubmission, useTimeTracking } from '../../lib/analytics';
+import TrackedButton from '../../components/TrackedButton';
 
 export default function LoginPageClient() {
   const router = useRouter();
@@ -16,6 +18,9 @@ export default function LoginPageClient() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Отслеживание времени на странице
+  useTimeTracking('login');
 
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -31,6 +36,8 @@ export default function LoginPageClient() {
     try {
       // First try to create a new account (auto sign-up)
       await createUserWithEmailAndPassword(auth, email, password);
+      trackLogin('email');
+      trackFormSubmission('login_form', true);
       router.push('/slots');
     } catch (err: unknown) {
       const firebaseError = err as AuthError;
@@ -38,6 +45,8 @@ export default function LoginPageClient() {
         // User already exists, try to sign in
         try {
           await signInWithEmailAndPassword(auth, email, password);
+          trackLogin('email');
+          trackFormSubmission('login_form', true);
           router.push('/slots');
         } catch (signInErr: unknown) {
           const signInFirebaseError = signInErr as AuthError;
@@ -50,13 +59,17 @@ export default function LoginPageClient() {
           } else {
             setError('Ошибка входа: ' + signInFirebaseError.message);
           }
+          trackFormSubmission('login_form', false);
         }
       } else if (firebaseError.code === 'auth/weak-password') {
         setError('Пароль должен содержать минимум 6 символов.');
+        trackFormSubmission('login_form', false);
       } else if (firebaseError.code === 'auth/invalid-email') {
         setError('Неверный формат email.');
+        trackFormSubmission('login_form', false);
       } else {
         setError('Ошибка при регистрации: ' + firebaseError.message);
+        trackFormSubmission('login_form', false);
       }
     } finally {
       setLoading(false);
@@ -75,6 +88,7 @@ export default function LoginPageClient() {
 
     try {
       await signInWithPopup(auth, provider);
+      trackLogin('google');
       router.push('/slots');
     } catch (err: unknown) {
       const firebaseError = err as AuthError;
@@ -127,17 +141,19 @@ export default function LoginPageClient() {
           />
         </div>
         {error && <div className="text-red-600 mb-4 text-sm">{error}</div>}
-        <button
+        <TrackedButton
           type="submit"
+          trackingName="login_form_submit"
           className="w-full bg-accent text-white py-2 px-4 rounded font-medium hover:opacity-90 disabled:opacity-50"
           disabled={loading}
         >
           {loading ? 'Вход...' : 'Войти / Зарегистрироваться'}
-        </button>
+        </TrackedButton>
       </form>
       <div className="text-center my-4 text-base-900">или</div>
-      <button
+      <TrackedButton
         onClick={handleGoogleLogin}
+        trackingName="google_login"
         className="w-full flex items-center justify-center bg-white border border-gray-300 text-base-900 py-2 px-4 rounded hover:bg-gray-50 disabled:opacity-50"
         disabled={loading}
       >
@@ -160,7 +176,7 @@ export default function LoginPageClient() {
           />
         </svg>
         {loading ? 'Вход...' : 'Войти через Google'}
-      </button>
+      </TrackedButton>
     </div>
   );
 }

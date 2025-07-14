@@ -6,7 +6,8 @@ import { useState, useEffect } from 'react';
 import { auth } from '../lib/firebase';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { usePathname } from 'next/navigation';
-import '@/shared/styles/globals.css';
+import { initGA, usePageTracking } from '../lib/analytics';
+import './globals.css';
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -17,6 +18,14 @@ const inter = Inter({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
+
+  // Инициализация Google Analytics
+  useEffect(() => {
+    initGA();
+  }, []);
+
+  // Отслеживание страниц
+  usePageTracking();
 
   useEffect(() => {
     if (!auth) {
@@ -43,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   // Проверяем, находится ли пользователь в личном кабинете
-  const isInDashboard = pathname?.startsWith('/slots') || pathname?.startsWith('/slot/');
+  const isInDashboard = pathname?.startsWith('/slots') || pathname?.startsWith('/slot/') || pathname?.startsWith('/analytics');
 
   return (
     <html lang="ru" className={inter.className}>
@@ -52,35 +61,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="bg-gray-50 text-gray-900">
           <div className="max-w-6xl mx-auto flex items-center justify-between py-4 px-5">
             {/* Логотип / бренд */}
-            <Link href="/" className="text-xl font-bold text-blue-700">
-              AdBrain Lab
+            <Link href="/" className="text-xl font-bold text-primary">
+              NeuroAd
             </Link>
             {/* Навигационные ссылки */}
             <nav className="flex items-center gap-6">
+              <Link href="/" className="hover:underline">
+                Главная
+              </Link>
               <Link href="/about" className="hover:underline">
                 О нас
               </Link>
               <Link href="/pricing" className="hover:underline">
                 Тарифы
               </Link>
-              {/* Если пользователь залогинен – показываем ссылку в кабинет, иначе – вход/регистрация */}
-              {user ? (
-                <Link href="/slots" className="hover:underline">
-                  Кабинет
-                </Link>
-              ) : (
-                <>
-                  <Link href="/login" className="hover:underline">
-                    Войти
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="bg-[#FF6B00] text-white font-medium px-4 py-2 rounded hover:opacity-90"
-                  >
-                    Начать бесплатно
-                  </Link>
-                </>
-              )}
+              {/* Регистрация временно отключена - продукт в разработке */}
               {/* Кнопка выхода появляется только в кабинете */}
               {user && isInDashboard && (
                 <button
@@ -98,9 +93,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="flex-1">{children}</main>
 
         {/* Подвал сайта */}
-        <footer className="relative z-0 bg-gray-900 text-gray-50 py-8 px-5 before:content-[''] before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] before:from-white/10 before:to-transparent before:pointer-events-none before:-z-10">
+        <footer className="relative z-0 bg-base-900 text-gray-50 py-8 px-5 before:content-[''] before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] before:from-white/10 before:to-transparent before:pointer-events-none before:-z-10">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-sm">© 2025 AdBrain Lab. Все права защищены.</div>
+            <div className="text-sm">© 2025 NeuroAd. Все права защищены.</div>
             <div>
               <Link href="/legal/privacy" className="text-gray-50 hover:underline">
                 Политика конфиденциальности

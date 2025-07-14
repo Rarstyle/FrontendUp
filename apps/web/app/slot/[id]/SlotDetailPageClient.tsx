@@ -3,109 +3,83 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuthGuard } from '@/shared/hooks/useAuthGuard';
-import { useLocalSlots, Slot } from '@/shared/hooks/useLocalSlots';
+import { useSlots, Slot } from '../../../hooks/useSlots';
 
 export default function SlotDetailPageClient() {
-  useAuthGuard();
   const { id } = useParams() as { id: string };
   const router = useRouter();
-  const { slots } = useLocalSlots();
+  const { getSlot } = useSlots();
   const [slot, setSlot] = useState<Slot | undefined>();
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (slots.length === 0) return;
-    const found = slots.find((s: Slot) => s.id === id);
-    if (!found) {
+    const foundSlot = getSlot(id);
+    if (!foundSlot) {
       router.replace('/slots');
     } else {
-      setSlot(found);
-      setIsLoading(false);
+      setSlot(foundSlot);
     }
-  }, [id, slots, router]);
+  }, [id, getSlot, router]);
 
-  if (slots.length === 0 || isLoading) {
-    return <div className="py-8 px-5">Загрузка...</div>;
-  }
   if (!slot) {
-    return <div className="py-8 px-5">Загрузка...</div>;
+    return (
+      <div className="max-w-3xl mx-auto py-8 px-5">
+        <div className="text-center">Загрузка...</div>
+      </div>
+    );
   }
-  const isCompleted = slot.status === 'completed';
-  const winner = slot.winnerVariant;
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-5 text-base-900">
-      <a
+    <div className="max-w-3xl mx-auto py-8 px-5">
+      <Link
         href="/slots"
-        className="text-primary hover:underline mb-4 inline-block"
+        className="text-blue-600 hover:underline mb-4 inline-block"
       >
-        ← Все слоты
-      </a>
-      <h1 className="text-2xl font-bold text-primary mb-4">{slot.name}</h1>
-      <div className="mb-6">
-        <div>
-          <strong>Платформа:</strong>{' '}
-          {slot.platform === 'vk' ? 'VK Ads' : 'Яндекс Директ'}
+        ← Все тесты
+      </Link>
+
+      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">{slot.title}</h1>
+
+        <div className="mb-6 space-y-2 text-sm text-gray-600">
+          <div>
+            <strong>Описание:</strong> {slot.description}
+          </div>
+          <div>
+            <strong>Бюджет:</strong> {slot.budget} ₽
+          </div>
+          <div>
+            <strong>Создан:</strong>{' '}
+            {new Date(slot.createdAt).toLocaleDateString()}
+          </div>
         </div>
-        <div>
-          <strong>Вариаций:</strong> {slot.variations}
-        </div>
-        <div>
-          <strong>Статус:</strong>{' '}
-          {isCompleted ? (
-            <span className="bg-success text-white py-1 px-2 rounded text-sm">
-              Завершён
-            </span>
-          ) : (
-            'В процессе'
-          )}
-        </div>
-      </div>
-      {slot.image ? (
+
         <div className="mb-6">
-          <img
-            src={slot.image}
-            alt="Креатив"
-            className="max-w-md h-auto rounded shadow-sm border"
-          />
-        </div>
-      ) : null}
-      <div className="mb-8">
-        <h2 className="font-semibold mb-2">Текст объявления:</h2>
-        <p className="p-4 bg-base-50 rounded">{slot.text}</p>
-      </div>
-      {isCompleted ? (
-        <div className="mb-8">
-          <h2 className="font-semibold mb-2">Результаты теста:</h2>
-          {winner ? (
-            <p className="mb-4 text-green-800">
-              ✅ Тест завершён. Победила вариация <strong>{winner}</strong>.
+          <h2 className="font-semibold mb-2 text-gray-900">
+            Статус тестирования:
+          </h2>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <p className="text-yellow-800">
+              ⏳ Тест в процессе выполнения. Результаты будут доступны после
+              завершения.
             </p>
-          ) : (
-            <p className="mb-4">Тест завершён.</p>
-          )}
-          <p>
-            {slot.explanation ||
-              'Вариант ' +
-                winner +
-                ' получил значительно более высокий CTR благодаря более привлекательному изображению и чётко сформулированному сообщению. Рекомендуем в дальнейшем использовать подобные элементы для повышения эффективности рекламных кампаний.'}
-          </p>
+          </div>
         </div>
-      ) : (
-        <p className="mb-8">
-          ⏳ Тест ещё выполняется. Результаты и объяснения будут доступны после
-          завершения.
-        </p>
-      )}
-      {!slot.demo && (
-        <Link
-          href={`/slot/${slot.id}/edit`}
-          className="inline-block bg-accent text-white font-medium px-4 py-2 rounded hover:opacity-90"
-        >
-          Редактировать слот
-        </Link>
-      )}
+
+        <div className="flex gap-4">
+          <Link
+            href={`/slot/${slot.id}/edit`}
+            className="bg-blue-600 text-white font-medium px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+          >
+            Редактировать тест
+          </Link>
+          <Link
+            href="/slots"
+            className="bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded hover:bg-gray-300 transition-colors"
+          >
+            Назад к списку
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,12 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuthGuard } from '../../hooks/useAuthGuard';
-import { useLocalSlots, type Slot } from '@/shared/hooks/useLocalSlots';
+import { useSlots } from '../../hooks/useSlots';
 
 export default function SlotsPageClient() {
-  useAuthGuard();
-  const { slots } = useLocalSlots();
+  const { slots, deleteSlot } = useSlots();
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-5">
@@ -16,78 +14,75 @@ export default function SlotsPageClient() {
           href="/slot/new"
           className="bg-[#FF6B00] text-white font-medium px-4 py-2 rounded inline-flex items-center hover:opacity-90"
         >
-          <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          <svg
+            className="h-5 w-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 4v16m8-8H4"
+            />
           </svg>
-          Создать слот
+          Создать тест
         </Link>
       </div>
+
       {slots.length === 0 ? (
-        <p className="text-gray-900">
-          Слотов пока нет. Нажмите «Создать слот», чтобы добавить первый A/B-тест.
-        </p>
+        <div className="text-center py-12">
+          <p className="text-gray-600 mb-4">Слотов пока нет.</p>
+          <p className="text-gray-500">
+            Нажмите «Создать тест», чтобы добавить первый A/B-тест.
+          </p>
+        </div>
       ) : (
-        <ul className="space-y-4">
-          {slots.map((slot: Slot) => (
-            <li key={slot.id} className="bg-gray-50 p-4 rounded flex items-center gap-4">
-              {/* Миниатюра изображения */}
-              <div className="flex-shrink-0">
-                {slot.image ? (
-                  <img
-                    src={slot.image}
-                    alt={slot.name}
-                    className="w-16 h-16 object-cover rounded border"
-                  />
-                ) : (
-                  <div className="w-16 h-16 bg-gray-200 rounded border flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </div>
-                )}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {slots.map((slot) => (
+            <div
+              key={slot.id}
+              className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {slot.title}
+                </h3>
+                <button
+                  onClick={() => deleteSlot(slot.id)}
+                  className="text-red-500 hover:text-red-700 text-sm"
+                >
+                  Удалить
+                </button>
               </div>
 
-              {/* Информация о слоте */}
-              <div className="flex-1">
+              <p className="text-gray-600 mb-4 line-clamp-3">
+                {slot.description}
+              </p>
+
+              <div className="flex justify-between items-center text-sm text-gray-500">
+                <span>Бюджет: {slot.budget} ₽</span>
+                <span>{new Date(slot.createdAt).toLocaleDateString()}</span>
+              </div>
+
+              <div className="mt-4 flex gap-2">
                 <Link
                   href={`/slot/${slot.id}`}
-                  className="text-blue-700 font-medium hover:underline"
+                  className="flex-1 bg-blue-600 text-white text-center py-2 px-4 rounded hover:bg-blue-700 transition-colors"
                 >
-                  {slot.name}{' '}
-                  {slot.demo && (
-                    <span className="text-xs bg-gray-300 text-gray-800 px-2 py-0.5 rounded ml-1">
-                      демо
-                    </span>
-                  )}
+                  Просмотр
                 </Link>
-                <div className="text-sm text-gray-900">
-                  Платформа: {slot.platform === 'vk' ? 'VK Ads' : 'Яндекс Директ'} • Статус:{' '}
-                  {slot.status === 'completed' ? 'Завершён' : 'Запущен'}
-                </div>
-              </div>
-
-              {/* Кнопка редактирования */}
-              {!slot.demo && (
                 <Link
                   href={`/slot/${slot.id}/edit`}
-                  className="text-blue-700 text-sm hover:underline flex-shrink-0"
+                  className="flex-1 bg-gray-200 text-gray-700 text-center py-2 px-4 rounded hover:bg-gray-300 transition-colors"
                 >
-                  редактировать
+                  Редактировать
                 </Link>
-              )}
-            </li>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

@@ -1,261 +1,126 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { trackTestCreation, trackFormSubmission } from '../lib/analytics';
+import TrackedButton from './TrackedButton';
 
-// Reusable Zod schemas for slot form
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png'];
-
-// Schema for creating a new slot
-const SlotSchema = z.object({
-  name: z
-    .string()
-    .nonempty('Введите название слота')
-    .min(3, 'Название слишком короткое')
-    .max(60, 'Название слишком длинное'),
-  platform: z.enum(['vk', 'yandex']),
-  text: z
-    .string()
-    .nonempty('Введите текст объявления')
-    .max(150, 'Текст объявления не должен превышать 150 символов'),
-  variations: z
-    .string()
-    .transform((val) => parseInt(val, 10))
-    .refine((val) => val === 2 || val === 3, {
-      message: 'Выберите 2 или 3 вариации',
-    }),
-  image: z
-    .any()
-    .optional()
-    .refine(
-      (files) => !files || (files instanceof FileList && files.length > 0),
-      'Выберите изображение'
-    )
-    .refine(
-      (files) =>
-        !files ||
-        (files instanceof FileList &&
-          ACCEPTED_IMAGE_TYPES.includes(files[0]?.type)),
-      'Допустимы только JPEG/PNG'
-    )
-    .refine(
-      (files) =>
-        !files ||
-        (files instanceof FileList && files[0]?.size <= MAX_FILE_SIZE),
-      'Размер изображения превышает 2 МБ'
-    ),
-});
-
-// Schema for updating a slot (image optional)
-const SlotSchemaUpdate = z.object({
-  name: z
-    .string()
-    .nonempty('Введите название слота')
-    .min(3, 'Название слишком короткое')
-    .max(60, 'Название слишком длинное'),
-  platform: z.enum(['vk', 'yandex']),
-  text: z
-    .string()
-    .nonempty('Введите текст объявления')
-    .max(150, 'Текст объявления не должен превышать 150 символов'),
-  variations: z
-    .string()
-    .transform((val) => parseInt(val, 10))
-    .refine((val) => val === 2 || val === 3, {
-      message: 'Выберите 2 или 3 вариации',
-    }),
-  image: z
-    .any()
-    .optional()
-    .superRefine((files, ctx) => {
-      if (!files || (files instanceof FileList && files.length === 0)) {
-        // No file selected - that's okay in update
-        return;
-      }
-      if (!(files instanceof FileList)) {
-        ctx.addIssue({ code: 'custom', message: 'Неверный формат файла' });
-        return;
-      }
-      const file = files[0];
-      if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-        ctx.addIssue({ code: 'custom', message: 'Допустимы только JPEG/PNG' });
-      }
-      if (file.size > MAX_FILE_SIZE) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Размер изображения превышает 2 МБ',
-        });
-      }
-    }),
-});
-
-export type SlotFormData = z.infer<typeof SlotSchema> & {
-  image?: FileList | null;
-};
-
-interface SlotFormProps {
-  onSubmit: (data: SlotFormData) => void;
-  initialSlot?: {
-    name: string;
-    platform: 'vk' | 'yandex';
-    text: string;
-    variations: number;
-    // image field not included in initial values
-  };
+interface SlotFormData {
+  title: string;
+  description: string;
+  budget: string;
 }
 
-// Тип для полей формы (variations — string)
-type SlotFormFields = {
-  name: string;
-  platform: 'vk' | 'yandex';
-  text: string;
-  variations: string;
-  image?: FileList | null;
-};
-
-export default function SlotForm({ onSubmit, initialSlot }: SlotFormProps) {
-  const isEdit = !!initialSlot;
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SlotFormFields>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(isEdit ? SlotSchemaUpdate : SlotSchema) as any,
-    defaultValues: initialSlot
-      ? {
-          name: initialSlot.name,
-          platform: initialSlot.platform,
-          text: initialSlot.text,
-          variations: initialSlot.variations.toString(),
-        }
-      : {
-          platform: 'vk',
-          variations: '2',
-        },
+export default function SlotForm() {
+  const router = useRouter();
+  const [formData, setFormData] = useState<SlotFormData>({
+    title: '',
+    description: '',
+    budget: '',
   });
 
-  // Обёртка для преобразования данных
-  const handleFormSubmit = (data: SlotFormFields) => {
-    const parsed = (isEdit ? SlotSchemaUpdate : SlotSchema).parse(data);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (onSubmit as any)(parsed);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      // Простое сохранение в localStorage
+      const slots = JSON.parse(localStorage.getItem('slots') || '[]');
+      const newSlot = {
+        id: Date.now().toString(),
+        ...formData,
+        createdAt: new Date().toISOString(),
+      };
+      slots.push(newSlot);
+      localStorage.setItem('slots', JSON.stringify(slots));
+      
+      // Отслеживаем успешное создание теста
+      trackTestCreation('ab_test');
+      trackFormSubmission('slot_form', true);
+      
+      router.push('/slots');
+    } catch (error) {
+      // Отслеживаем ошибку
+      trackFormSubmission('slot_form', false);
+      console.error('Ошибка при создании теста:', error);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)}>
-      <div className="mb-4">
-        <label
-          htmlFor="slot-name"
-          className="block font-medium text-base-900 mb-1"
-        >
-          Название слота
-        </label>
-        <input
-          id="slot-name"
-          type="text"
-          className="w-full border border-gray-300 rounded px-3 py-2"
-          placeholder="Например, Тест баннера #1"
-          {...register('name')}
-        />
-        {errors.name && (
-          <div className="text-red-600 text-sm mt-1">{errors.name.message}</div>
-        )}
-      </div>
-      <div className="mb-4">
-        <label
-          htmlFor="platform"
-          className="block font-medium text-base-900 mb-1"
-        >
-          Платформа
-        </label>
-        <select
-          id="platform"
-          className="w-full border border-gray-300 rounded px-3 py-2"
-          {...register('platform')}
-        >
-          <option value="vk">VK Ads</option>
-          <option value="yandex">Яндекс Директ</option>
-        </select>
-        {errors.platform && (
-          <div className="text-red-600 text-sm mt-1">
-            {errors.platform.message}
-          </div>
-        )}
-      </div>
-      <div className="mb-4">
-        <label
-          htmlFor="ad-text"
-          className="block font-medium text-base-900 mb-1"
-        >
-          Текст объявления
-        </label>
-        <textarea
-          id="ad-text"
-          maxLength={150}
-          className="w-full border border-gray-300 rounded px-3 py-2 h-24"
-          placeholder="Введите рекламный текст (до 150 символов)"
-          {...register('text')}
-        />
-        {errors.text && (
-          <div className="text-red-600 text-sm mt-1">{errors.text.message}</div>
-        )}
-      </div>
-      <div className="mb-4">
-        <label htmlFor="image" className="block font-medium text-base-900 mb-1">
-          Изображение
-        </label>
-        <input
-          id="image"
-          type="file"
-          accept="image/jpeg,image/png"
-          className="block w-full text-base-900"
-          {...register('image')}
-        />
-        {errors.image && (
-          <div className="text-red-600 text-sm mt-1">
-            {errors.image.message}
-          </div>
-        )}
-      </div>
-      <fieldset className="mb-6">
-        <legend className="block font-medium text-base-900 mb-1">
-          Количество вариаций
-        </legend>
-        <div className="flex items-center gap-4">
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              value="2"
-              {...register('variations')}
-              className="mr-1"
-            />
-            2 вариации
+    <div className="max-w-2xl mx-auto p-6">
+      <h2 className="text-2xl font-bold mb-6">Создать новый A/B-тест</h2>
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+            Название теста
           </label>
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              value="3"
-              {...register('variations')}
-              className="mr-1"
-            />
-            3 вариации
-          </label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Введите название теста"
+          />
         </div>
-        {errors.variations && (
-          <div className="text-red-600 text-sm mt-1">
-            {errors.variations.message}
-          </div>
-        )}
-      </fieldset>
-      <button
-        type="submit"
-        className="bg-accent text-white font-medium px-4 py-2 rounded hover:opacity-90"
-      >
-        {isEdit ? 'Сохранить' : 'Создать'}
-      </button>
-    </form>
+
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+            Описание
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            rows={4}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Опишите ваш тест"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-2">
+            Бюджет (руб.)
+          </label>
+          <input
+            type="number"
+            id="budget"
+            name="budget"
+            value={formData.budget}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Укажите бюджет"
+          />
+        </div>
+
+        <div className="flex gap-4">
+          <TrackedButton
+            type="submit"
+            trackingName="create_test_submit"
+            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Создать тест
+          </TrackedButton>
+          <TrackedButton
+            type="button"
+            trackingName="create_test_cancel"
+            onClick={() => router.back()}
+            className="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors"
+          >
+            Отмена
+          </TrackedButton>
+        </div>
+      </form>
+    </div>
   );
 }

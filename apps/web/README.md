@@ -1,36 +1,133 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AdBrain Lab - Упрощенная структура
 
-## Getting Started
+Веб-приложение для управления A/B-тестами рекламных креативов с упрощенной структурой проекта и встроенной аналитикой.
 
-First, run the development server:
+## Структура проекта
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+apps/web/
+├── app/                    # Next.js App Router
+│   ├── globals.css        # Глобальные стили
+│   ├── layout.tsx         # Основной layout
+│   ├── page.tsx           # Главная страница
+│   ├── HomePageClient.tsx # Клиентский компонент главной страницы
+│   ├── login/             # Страница входа
+│   ├── slots/             # Список тестов
+│   ├── slot/              # Детали и редактирование тестов
+│   ├── about/             # Страница о нас
+│   ├── pricing/           # Страница тарифов
+│   ├── legal/             # Юридические страницы
+│   └── analytics/         # Дашборд аналитики
+├── components/            # Переиспользуемые компоненты
+│   ├── SlotForm.tsx       # Форма создания/редактирования тестов
+│   ├── TrackedButton.tsx  # Кнопка с отслеживанием кликов
+│   └── TrackedLink.tsx    # Ссылка с отслеживанием кликов
+├── hooks/                 # Кастомные хуки
+│   └── useSlots.ts        # Хук для работы с тестами
+└── lib/                   # Библиотеки
+    ├── firebase.ts        # Конфигурация Firebase
+    └── analytics.ts       # Система аналитики
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Функциональность
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- ✅ Авторизация через Firebase (email/password + Google OAuth)
+- ✅ Создание A/B-тестов
+- ✅ Просмотр списка тестов
+- ✅ Редактирование тестов
+- ✅ Удаление тестов
+- ✅ Простое хранение данных в localStorage
+- ✅ Страницы: главная, о нас, тарифы, политика конфиденциальности
+- ✅ **Аналитика пользовательского поведения**
+  - Отслеживание кликов по кнопкам
+  - Отслеживание времени на страницах
+  - Отслеживание скролла
+  - Отслеживание форм
+  - Дашборд с метриками
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Аналитика
 
-## Learn More
+Система аналитики отслеживает:
 
-To learn more about Next.js, take a look at the following resources:
+### 📊 Что отслеживается:
+- **Клики по кнопкам** - каждая кнопка имеет уникальный идентификатор
+- **Время на странице** - сколько времени пользователь провел на каждой странице
+- **Глубина скролла** - насколько глубоко пользователь прокрутил страницу
+- **Отправка форм** - успешные и неуспешные попытки
+- **Авторизация** - через email или Google
+- **Создание тестов** - конверсия в создание A/B-тестов
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 📈 Дашборд аналитики:
+- Основные метрики (просмотры, посетители, конверсия)
+- Популярные страницы
+- Популярные кнопки
+- Путь пользователя
+- Рекомендации по оптимизации
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Запуск проекта
 
-## Deploy on Vercel
+1. Установите зависимости:
+```bash
+npm install
+# или
+pnpm install
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. Создайте файл `.env.local` с настройками Firebase и Google Analytics:
+```
+# Firebase
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE=your_storage_bucket
+NEXT_PUBLIC_FIREBASE_MSG_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Google Analytics 4
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+```
+
+3. Запустите проект:
+```bash
+npm run dev
+# или
+pnpm dev
+```
+
+4. Откройте http://localhost:3000
+
+## Настройка аналитики
+
+### Google Analytics 4:
+1. Создайте аккаунт в Google Analytics
+2. Создайте новое свойство (GA4)
+3. Скопируйте ID измерения (G-XXXXXXXXXX)
+4. Добавьте в `.env.local`
+
+### Яндекс.Директ:
+1. В настройках кампании добавьте UTM-метки
+2. Отслеживайте конверсии через Google Analytics
+3. Анализируйте путь пользователя в дашборде
+
+## Что было упрощено
+
+- ✅ Убрана FSD архитектура (сложные папки src/, shared/, features/)
+- ✅ Упрощена структура проекта
+- ✅ Убраны лишние node_modules из корня
+- ✅ Оставлена только одна папка с зависимостями
+- ✅ Функциональность сайта полностью сохранена
+- ✅ Добавлена система аналитики
+
+## Технологии
+
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS
+- Firebase Auth (email/password + Google OAuth)
+- Firestore
+- localStorage для хранения данных
+- Zod для валидации
+- React Hook Form
+- Google Analytics 4

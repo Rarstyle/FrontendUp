@@ -3,7 +3,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-//import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -29,6 +28,3 @@ provider.setCustomParameters({
   prompt: 'select_account',
   access_type: 'offline',
 });
-
-// Only initialize analytics in browser (to avoid SSR issues)
-//export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
