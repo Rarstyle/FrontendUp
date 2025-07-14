@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Политика конфиденциальности – AdBrain Lab",
+  title: 'Политика конфиденциальности – AdBrain Lab',
 };
 
 export default function PrivacyPolicyPage() {
@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
         платформы.
       </p>
       <h2 className="text-xl font-semibold mt-4 mb-2">
-        2. Использование данных
+        2. Использование данных.
       </h2>
       <p>
         Собранные данные используются исключительно для предоставления сервисов
