@@ -1,3 +1,4 @@
+import React from 'react';
 import SlotDetailPageClient from './SlotDetailPageClient';
 import { Metadata } from 'next';
 
@@ -12,6 +13,8 @@ export async function generateMetadata({
   };
 }
 
-export default function Page({ params }: { params: { id: string } }) {
+const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
   return <SlotDetailPageClient />;
-}
+};
+
+export default Page;
