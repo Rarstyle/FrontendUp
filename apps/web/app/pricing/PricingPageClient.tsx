@@ -14,7 +14,9 @@ interface Plan {
 }
 
 export default function PricingPageClient() {
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>(
+    'monthly'
+  );
 
   const plans: Plan[] = [
     {
@@ -89,7 +91,9 @@ export default function PricingPageClient() {
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white py-20">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative max-w-6xl mx-auto px-5 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">Выберите свой план</h1>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            Выберите свой план
+          </h1>
           <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
             От стартапов до крупных агентств — у нас есть решение для каждого
           </p>
@@ -102,7 +106,11 @@ export default function PricingPageClient() {
               Ежемесячно
             </span>
             <button
-              onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'yearly' : 'monthly')}
+              onClick={() =>
+                setBillingPeriod(
+                  billingPeriod === 'monthly' ? 'yearly' : 'monthly'
+                )
+              }
               className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors ${
                 billingPeriod === 'yearly' ? 'bg-white' : 'bg-blue-200'
               }`}
@@ -146,7 +154,9 @@ export default function PricingPageClient() {
               <div className="p-8">
                 {/* Plan Header */}
                 <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    {plan.name}
+                  </h3>
                   <p className="text-gray-600 mb-4">{plan.description}</p>
 
                   {/* Price */}
@@ -197,43 +207,24 @@ export default function PricingPageClient() {
 
                 {/* CTA Button */}
                 <Link
-                  href="/login"
+                  href={
+                    plan.name === 'Enterprise'
+                      ? '/about'
+                      : `/payment?plan=${plan.name}&billing=${billingPeriod}`
+                  }
                   className={`w-full block text-center py-3 px-6 rounded-xl font-medium transition-all duration-200 ${
                     plan.popular
                       ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl'
                       : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-900 hover:from-gray-200 hover:to-gray-300'
                   }`}
                 >
-                  {plan.name === 'Enterprise' ? 'Связаться с нами' : 'Начать бесплатно'}
+                  {plan.name === 'Enterprise'
+                    ? 'Связаться с нами'
+                    : 'Выбрать план'}
                 </Link>
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Additional Info */}
-        <div className="mt-16 text-center">
-          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Попробуйте бесплатно</h3>
-            <p className="text-gray-600 mb-6 text-lg">
-              3 дня или 10 креативов бесплатно — что наступит раньше. Никаких обязательств, полный
-              доступ ко всем функциям.
-            </p>
-            <Link
-              href="/login"
-              className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium px-8 py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              Начать бесплатный trial
-              <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </Link>
-          </div>
         </div>
       </div>
     </div>

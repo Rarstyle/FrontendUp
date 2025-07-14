@@ -2,9 +2,9 @@ import LoginPageClient from './LoginPageClient';
 
 // Static metadata for SEO
 export const metadata = {
-  title: 'Войти или зарегистрироваться – AdBrain Lab',
+  title: 'Войти или зарегистрироваться – NeuroAd',
   description:
-    'Войдите в свой аккаунт AdBrain Lab или создайте новый. Начните использовать AI для оптимизации рекламных креативов.',
+    'Войдите в свой аккаунт NeuroAd или создайте новый. Начните использовать AI для оптимизации рекламных креативов.',
 };
 
 export default function LoginPage() {

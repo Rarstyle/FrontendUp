@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from 'next/link';
 
 export default function Hero() {
   return (
@@ -12,10 +12,10 @@ export default function Hero() {
           с объяснимым AI
         </p>
         <Link
-          href="/login"
+          href="/pricing"
           className="bg-accent text-white text-lg font-medium px-6 py-3 rounded hover:opacity-90"
         >
-          Начать бесплатно
+          Смотреть тарифы
         </Link>
       </div>
     </section>

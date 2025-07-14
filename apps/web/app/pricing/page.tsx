@@ -2,9 +2,9 @@ import PricingPageClient from './PricingPageClient';
 
 // Static metadata for SEO
 export const metadata = {
-  title: 'Тарифы – AdBrain Lab',
+  title: 'Тарифы – NeuroAd',
   description:
-    'Тарифные планы: Start, Grow, Scale, Enterprise. 3 дня бесплатного доступа (или 10 креативов) для новых пользователей.',
+    'Тарифные планы: Start, Grow, Scale, Enterprise. Выберите подходящий план для вашего бизнеса.',
 };
 
 export default function PricingPage() {

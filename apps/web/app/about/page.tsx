@@ -1,7 +1,9 @@
+import Link from 'next/link';
+
 export const metadata = {
-  title: 'О нас – AdBrain Lab',
+  title: 'О нас – NeuroAd',
   description:
-    'Миссия, команда и ценности AdBrain Lab – кто стоит за платформой и ради чего мы работаем',
+    'Миссия, команда и ценности NeuroAd – кто стоит за платформой и ради чего мы работаем',
 };
 
 export default function AboutPage() {
@@ -12,8 +14,9 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto px-5 text-center">
           <h1 className="text-4xl font-bold mb-4">О нас</h1>
           <p className="text-lg text-blue-100 max-w-2xl mx-auto leading-relaxed">
-            Мы создаём будущее рекламы, где каждый креатив становится эффективнее благодаря
-            искусственному интеллекту и прозрачной аналитике
+            Мы создаём будущее рекламы, где каждый креатив становится
+            эффективнее благодаря искусственному интеллекту и прозрачной
+            аналитике
           </p>
         </div>
       </section>
@@ -37,10 +40,12 @@ export default function AboutPage() {
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Наша миссия</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              Наша миссия
+            </h2>
             <p className="text-base text-gray-600 max-w-3xl mx-auto">
-              Дать малому бизнесу инструмент, который за 5 минут повышает CTR рекламы на 20%
-              благодаря explainable AI.
+              Дать малому бизнесу инструмент, который за 5 минут повышает CTR
+              рекламы на 20% благодаря explainable AI.
             </p>
           </div>
         </div>
@@ -74,9 +79,13 @@ export default function AboutPage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Илья Федоров</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">
+                Илья Федоров
+              </h3>
               <p className="text-blue-600 font-medium mb-1">CEO</p>
-              <p className="text-gray-600 text-sm">7 лет в performance-маркетинге</p>
+              <p className="text-gray-600 text-sm">
+                7 лет в performance-маркетинге
+              </p>
             </div>
 
             {/* CTO */}
@@ -96,9 +105,13 @@ export default function AboutPage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Мария Соколова</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">
+                Мария Соколова
+              </h3>
               <p className="text-purple-600 font-medium mb-1">CTO</p>
-              <p className="text-gray-600 text-sm">ex-Mail.ru Ads, эксперт по Gen-AI pipeline</p>
+              <p className="text-gray-600 text-sm">
+                ex-Mail.ru Ads, эксперт по Gen-AI pipeline
+              </p>
             </div>
 
             {/* ML Engineer */}
@@ -118,9 +131,13 @@ export default function AboutPage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Артём Громов</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">
+                Артём Громов
+              </h3>
               <p className="text-green-600 font-medium mb-1">ML-инженер</p>
-              <p className="text-gray-600 text-sm">Исследователь eye-tracking</p>
+              <p className="text-gray-600 text-sm">
+                Исследователь eye-tracking
+              </p>
             </div>
           </div>
         </div>
@@ -130,8 +147,12 @@ export default function AboutPage() {
       <section className="py-12 bg-white">
         <div className="max-w-4xl mx-auto px-5">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Наши ценности</h2>
-            <p className="text-base text-gray-600">Принципы, которые направляют нашу работу</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              Наши ценности
+            </h2>
+            <p className="text-base text-gray-600">
+              Принципы, которые направляют нашу работу
+            </p>
           </div>
 
           <div className="space-y-6">
@@ -153,11 +174,13 @@ export default function AboutPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Прозрачность результатов</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  Прозрачность результатов
+                </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Мы открыто показываем данные: какой креатив выиграл и почему. Никаких чёрных
-                  ящиков — только понятная аналитика, которая помогает принимать обоснованные
-                  решения.
+                  Мы открыто показываем данные: какой креатив выиграл и почему.
+                  Никаких чёрных ящиков — только понятная аналитика, которая
+                  помогает принимать обоснованные решения.
                 </p>
               </div>
             </div>
@@ -180,10 +203,13 @@ export default function AboutPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Экономия времени</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  Экономия времени
+                </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Ценим ваше время – автоматизируем рутину, чтобы вы фокусировались на бизнесе. Наша
-                  платформа работает за секунды, а не за часы.
+                  Ценим ваше время – автоматизируем рутину, чтобы вы
+                  фокусировались на бизнесе. Наша платформа работает за секунды,
+                  а не за часы.
                 </p>
               </div>
             </div>
@@ -206,10 +232,12 @@ export default function AboutPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Рост клиента = наш рост</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  Рост клиента = наш рост
+                </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Мы растём вместе с успехом наших клиентов, поэтому нацелены на максимальный ROI
-                  каждого. Ваш успех — это наш успех.
+                  Мы растём вместе с успехом наших клиентов, поэтому нацелены на
+                  максимальный ROI каждого. Ваш успех — это наш успех.
                 </p>
               </div>
             </div>
@@ -220,16 +248,19 @@ export default function AboutPage() {
       {/* CTA Section */}
       <section className="py-12 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto px-5 text-center">
-          <h2 className="text-2xl font-bold mb-3">Готовы повысить эффективность рекламы?</h2>
+          <h2 className="text-2xl font-bold mb-3">
+            Готовы повысить эффективность рекламы?
+          </h2>
           <p className="text-lg text-blue-100 mb-6">
-            Присоединяйтесь к тысячам бизнесов, которые уже используют AI для оптимизации креативов
+            Присоединяйтесь к тысячам бизнесов, которые уже используют AI для
+            оптимизации креативов
           </p>
-          <a
-            href="/login"
+          <Link
+            href="/pricing"
             className="inline-block bg-white text-blue-600 font-bold px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            Начать бесплатно
-          </a>
+            Смотреть тарифы
+          </Link>
         </div>
       </section>
     </div>
