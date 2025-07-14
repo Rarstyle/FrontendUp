@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSlots, Slot } from '../../../hooks/useSlots';
 
-export default function SlotDetailPageClient() {
-  const { id } = useParams() as { id: string };
+export default function SlotDetailPageClient({ id }: { id: string }) {
   const router = useRouter();
   const { getSlot } = useSlots();
   const [slot, setSlot] = useState<Slot | undefined>();

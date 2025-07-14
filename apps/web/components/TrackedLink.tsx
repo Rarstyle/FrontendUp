@@ -13,13 +13,13 @@ interface TrackedLinkProps {
   page?: string;
 }
 
-export default function TrackedLink({ 
-  href, 
-  children, 
-  className, 
+export default function TrackedLink({
+  href,
+  children,
+  className,
   trackingName = 'link',
   linkType = 'internal',
-  page = 'unknown'
+  page = 'unknown',
 }: TrackedLinkProps) {
   const handleClick = () => {
     trackLinkClick(trackingName, page, href, linkType);
@@ -30,4 +30,4 @@ export default function TrackedLink({
       {children}
     </Link>
   );
-} 
+}

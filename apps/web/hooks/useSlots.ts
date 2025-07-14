@@ -27,7 +27,7 @@ export function useSlots() {
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
     };
-    
+
     const updatedSlots = [...slots, newSlot];
     setSlots(updatedSlots);
     localStorage.setItem('slots', JSON.stringify(updatedSlots));
@@ -49,4 +49,4 @@ export function useSlots() {
     deleteSlot,
     getSlot,
   };
-} 
+}

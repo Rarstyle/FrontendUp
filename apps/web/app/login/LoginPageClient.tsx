@@ -9,7 +9,11 @@ import {
   AuthError,
 } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { trackLogin, trackFormSubmission, useTimeTracking } from '../../lib/analytics';
+import {
+  trackLogin,
+  trackFormSubmission,
+  useTimeTracking,
+} from '../../lib/analytics';
 import TrackedButton from '../../components/TrackedButton';
 
 export default function LoginPageClient() {
@@ -99,9 +103,13 @@ export default function LoginPageClient() {
           'Всплывающее окно было заблокировано браузером. Разрешите всплывающие окна для этого сайта.'
         );
       } else if (firebaseError.code === 'auth/unauthorized-domain') {
-        setError('Домен не авторизован для Google OAuth. Обратитесь к администратору.');
+        setError(
+          'Домен не авторизован для Google OAuth. Обратитесь к администратору.'
+        );
       } else if (firebaseError.code === 'auth/argument-error') {
-        setError('Ошибка конфигурации Google OAuth. Проверьте настройки Firebase.');
+        setError(
+          'Ошибка конфигурации Google OAuth. Проверьте настройки Firebase.'
+        );
       } else {
         setError('Ошибка входа через Google: ' + firebaseError.message);
       }
@@ -112,10 +120,18 @@ export default function LoginPageClient() {
 
   return (
     <div className="max-w-md mx-auto py-12 px-5">
-      <h1 className="text-2xl font-bold text-center mb-8">Войти или зарегистрироваться</h1>
-      <form onSubmit={handleEmailLogin} className="bg-base-50 p-6 rounded shadow-sm">
+      <h1 className="text-2xl font-bold text-center mb-8">
+        Войти или зарегистрироваться
+      </h1>
+      <form
+        onSubmit={handleEmailLogin}
+        className="bg-base-50 p-6 rounded shadow-sm"
+      >
         <div className="mb-4">
-          <label htmlFor="email" className="block text-base-900 font-medium mb-1">
+          <label
+            htmlFor="email"
+            className="block text-base-900 font-medium mb-1"
+          >
             Email
           </label>
           <input
@@ -123,12 +139,15 @@ export default function LoginPageClient() {
             type="email"
             className="w-full border border-gray-300 rounded px-3 py-2"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             required
           />
         </div>
         <div className="mb-6">
-          <label htmlFor="password" className="block text-base-900 font-medium mb-1">
+          <label
+            htmlFor="password"
+            className="block text-base-900 font-medium mb-1"
+          >
             Пароль
           </label>
           <input
@@ -136,7 +155,7 @@ export default function LoginPageClient() {
             type="password"
             className="w-full border border-gray-300 rounded px-3 py-2"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             required
           />
         </div>

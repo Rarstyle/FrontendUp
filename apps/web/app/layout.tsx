@@ -2,11 +2,11 @@
 
 import { Inter } from 'next/font/google';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { auth } from '../lib/firebase';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { usePathname } from 'next/navigation';
-import { initGA, usePageTracking } from '../lib/analytics';
+import AnalyticsTracker from '../lib/AnalyticsTracker';
 import './globals.css';
 
 const inter = Inter({
@@ -15,24 +15,20 @@ const inter = Inter({
   fallback: ['system-ui', 'sans-serif'],
 });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
-
-  // Инициализация Google Analytics
-  useEffect(() => {
-    initGA();
-  }, []);
-
-  // Отслеживание страниц
-  usePageTracking();
 
   useEffect(() => {
     if (!auth) {
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, user => {
       setUser(user);
     });
     return () => unsubscribe();
@@ -52,11 +48,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   // Проверяем, находится ли пользователь в личном кабинете
-  const isInDashboard = pathname?.startsWith('/slots') || pathname?.startsWith('/slot/') || pathname?.startsWith('/analytics');
+  const isInDashboard =
+    pathname?.startsWith('/slots') ||
+    pathname?.startsWith('/slot/') ||
+    pathname?.startsWith('/analytics');
 
   return (
     <html lang="ru" className={inter.className}>
-      <body className="min-h-screen flex flex-col">
+      <body>
+        <Suspense>
+          <AnalyticsTracker />
+        </Suspense>
         {/* Шапка сайта */}
         <header className="bg-gray-50 text-gray-900">
           <div className="max-w-6xl mx-auto flex items-center justify-between py-4 px-5">
@@ -97,7 +99,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-sm">© 2025 NeuroAd. Все права защищены.</div>
             <div>
-              <Link href="/legal/privacy" className="text-gray-50 hover:underline">
+              <Link
+                href="/legal/privacy"
+                className="text-gray-50 hover:underline"
+              >
                 Политика конфиденциальности
               </Link>
             </div>

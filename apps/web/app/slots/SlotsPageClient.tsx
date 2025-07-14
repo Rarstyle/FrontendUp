@@ -40,7 +40,7 @@ export default function SlotsPageClient() {
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {slots.map((slot) => (
+          {slots.map(slot => (
             <div
               key={slot.id}
               className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"

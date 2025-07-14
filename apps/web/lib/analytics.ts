@@ -26,6 +26,21 @@ export const initGA = () => {
     });
 
     window.gtag = gtag;
+    if (process.env.NODE_ENV === 'development') {
+      (window as Window & typeof globalThis & { gtag_debug: boolean }).gtag_debug = true;
+    }
+  }
+};
+
+const isGAInitialized = () => {
+  return typeof window !== 'undefined' && (window as Window & typeof globalThis & { gtag: Gtag.Gtag }).gtag;
+};
+
+export const trackPageview = (url: string) => {
+  if (isGAInitialized()) {
+    window.gtag('config', process.env.NEXT_PUBLIC_GA_ID as string, {
+      page_path: url,
+    });
   }
 };
 
@@ -65,14 +80,25 @@ export const trackEvent = (
       ...customParams,
     };
     window.gtag('event', action, eventParams);
-    
+
     // Также отправляем в консоль для отладки
-    console.log('Analytics Event:', { action, category, label, value, customParams });
+    console.log('Analytics Event:', {
+      action,
+      category,
+      label,
+      value,
+      customParams,
+    });
   }
 };
 
 // Отслеживание кликов по кнопкам с деталями
-export const trackButtonClick = (buttonName: string, page: string, buttonType: 'primary' | 'secondary' | 'cta' = 'primary', position?: string) => {
+export const trackButtonClick = (
+  buttonName: string,
+  page: string,
+  buttonType: 'primary' | 'secondary' | 'cta' = 'primary',
+  position?: string
+) => {
   trackEvent('button_click', 'engagement', `${page}_${buttonName}`, undefined, {
     button_type: buttonType,
     button_position: position,
@@ -81,7 +107,12 @@ export const trackButtonClick = (buttonName: string, page: string, buttonType: '
 };
 
 // Отслеживание кликов по ссылкам
-export const trackLinkClick = (linkName: string, page: string, destination: string, linkType: 'internal' | 'external' = 'internal') => {
+export const trackLinkClick = (
+  linkName: string,
+  page: string,
+  destination: string,
+  linkType: 'internal' | 'external' = 'internal'
+) => {
   trackEvent('link_click', 'navigation', `${page}_${linkName}`, undefined, {
     destination_url: destination,
     link_type: linkType,
@@ -90,7 +121,11 @@ export const trackLinkClick = (linkName: string, page: string, destination: stri
 };
 
 // Отслеживание времени на странице с деталями
-export const trackTimeOnPage = (page: string, timeSpent: number, scrollDepth: number = 0) => {
+export const trackTimeOnPage = (
+  page: string,
+  timeSpent: number,
+  scrollDepth: number = 0
+) => {
   trackEvent('time_on_page', 'engagement', page, Math.round(timeSpent / 1000), {
     scroll_depth: scrollDepth,
     page_sections_viewed: getViewedSections(),
@@ -98,7 +133,11 @@ export const trackTimeOnPage = (page: string, timeSpent: number, scrollDepth: nu
 };
 
 // Отслеживание скролла с деталями
-export const trackScroll = (page: string, scrollDepth: number, timeToScroll: number) => {
+export const trackScroll = (
+  page: string,
+  scrollDepth: number,
+  timeToScroll: number
+) => {
   trackEvent('scroll', 'engagement', `${page}_${scrollDepth}%`, undefined, {
     time_to_scroll: timeToScroll,
     page_section: getPageSection(),
@@ -106,13 +145,24 @@ export const trackScroll = (page: string, scrollDepth: number, timeToScroll: num
 };
 
 // Отслеживание времени чтения контента
-export const trackReadingTime = (page: string, section: string, timeSpent: number, contentLength: number) => {
+export const trackReadingTime = (
+  page: string,
+  section: string,
+  timeSpent: number,
+  contentLength: number
+) => {
   const readingSpeed = contentLength / (timeSpent / 1000); // символов в секунду
-  trackEvent('reading_time', 'engagement', `${page}_${section}`, Math.round(timeSpent / 1000), {
-    content_length: contentLength,
-    reading_speed: Math.round(readingSpeed),
-    section_name: section,
-  });
+  trackEvent(
+    'reading_time',
+    'engagement',
+    `${page}_${section}`,
+    Math.round(timeSpent / 1000),
+    {
+      content_length: contentLength,
+      reading_speed: Math.round(readingSpeed),
+      section_name: section,
+    }
+  );
 };
 
 // Отслеживание формы с деталями
@@ -121,14 +171,24 @@ export const trackFormSubmission = (
   success: boolean,
   formData?: Record<string, unknown>
 ) => {
-  trackEvent('form_submit', 'conversion', `${formName}_${success ? 'success' : 'error'}`, undefined, {
-    form_fields_count: formData ? Object.keys(formData).length : 0,
-    form_data: formData,
-  });
+  trackEvent(
+    'form_submit',
+    'conversion',
+    `${formName}_${success ? 'success' : 'error'}`,
+    undefined,
+    {
+      form_fields_count: formData ? Object.keys(formData).length : 0,
+      form_data: formData,
+    }
+  );
 };
 
 // Отслеживание входа пользователя
-export const trackLogin = (method: 'email' | 'google', success: boolean, errorMessage?: string) => {
+export const trackLogin = (
+  method: 'email' | 'google',
+  success: boolean,
+  errorMessage?: string
+) => {
   trackEvent('login', 'authentication', method, undefined, {
     success: success,
     error_message: errorMessage,
@@ -146,15 +206,28 @@ export const trackTestCreation = (
 };
 
 // Отслеживание просмотра тарифов
-export const trackPricingView = (planName: string, action: 'view' | 'click' | 'select') => {
-  trackEvent('pricing_interaction', 'conversion', `${planName}_${action}`, undefined, {
-    plan_name: planName,
-    action_type: action,
-  });
+export const trackPricingView = (
+  planName: string,
+  action: 'view' | 'click' | 'select'
+) => {
+  trackEvent(
+    'pricing_interaction',
+    'conversion',
+    `${planName}_${action}`,
+    undefined,
+    {
+      plan_name: planName,
+      action_type: action,
+    }
+  );
 };
 
 // Отслеживание конверсий
-export const trackConversion = (conversionType: string, value?: number, currency: string = 'RUB') => {
+export const trackConversion = (
+  conversionType: string,
+  value?: number,
+  currency: string = 'RUB'
+) => {
   trackEvent('conversion', 'revenue', conversionType, value, {
     currency: currency,
     conversion_type: conversionType,
@@ -162,7 +235,11 @@ export const trackConversion = (conversionType: string, value?: number, currency
 };
 
 // Отслеживание ошибок
-export const trackError = (errorType: string, errorMessage: string, page: string) => {
+export const trackError = (
+  errorType: string,
+  errorMessage: string,
+  page: string
+) => {
   trackEvent('error', 'technical', `${page}_${errorType}`, undefined, {
     error_message: errorMessage,
     error_type: errorType,
@@ -170,7 +247,11 @@ export const trackError = (errorType: string, errorMessage: string, page: string
 };
 
 // Отслеживание производительности
-export const trackPerformance = (metric: string, value: number, page: string) => {
+export const trackPerformance = (
+  metric: string,
+  value: number,
+  page: string
+) => {
   trackEvent('performance', 'technical', `${page}_${metric}`, value, {
     metric_name: metric,
   });
@@ -185,7 +266,7 @@ export const usePageTracking = () => {
     if (GA_TRACKING_ID && typeof window !== 'undefined') {
       const url = pathname + searchParams.toString();
       const pageTitle = document.title;
-      
+
       window.gtag('config', GA_TRACKING_ID, {
         page_path: url,
         page_title: pageTitle,
@@ -218,7 +299,8 @@ export const useTimeTracking = (pageName: string) => {
     // Отслеживаем скролл для определения глубины
     const handleScroll = () => {
       const scrollTop = window.pageYOffset;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
       const scrollPercent = Math.round((scrollTop / docHeight) * 100);
       scrollDepthRef.current = Math.max(scrollDepthRef.current, scrollPercent);
     };
@@ -227,7 +309,8 @@ export const useTimeTracking = (pageName: string) => {
 
     return () => {
       const timeSpent = Date.now() - startTimeRef.current;
-      if (timeSpent > 1000) { // Отслеживаем только если провели больше 1 секунды
+      if (timeSpent > 1000) {
+        // Отслеживаем только если провели больше 1 секунды
         trackTimeOnPage(pageName, timeSpent, scrollDepthRef.current);
       }
       window.removeEventListener('scroll', handleScroll);
@@ -245,13 +328,17 @@ export const useScrollTracking = (pageName: string) => {
 
     const handleScroll = () => {
       const scrollTop = window.pageYOffset;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
       const scrollPercent = Math.round((scrollTop / docHeight) * 100);
 
       // Отслеживаем каждые 25% скролла
       const scrollMilestone = Math.floor(scrollPercent / 25) * 25;
-      
-      if (scrollMilestone > 0 && !scrollTrackedRef.current.has(scrollMilestone)) {
+
+      if (
+        scrollMilestone > 0 &&
+        !scrollTrackedRef.current.has(scrollMilestone)
+      ) {
         scrollTrackedRef.current.add(scrollMilestone);
         const timeToScroll = Date.now() - scrollStartTimeRef.current;
         trackScroll(pageName, scrollMilestone, timeToScroll);
@@ -264,7 +351,11 @@ export const useScrollTracking = (pageName: string) => {
 };
 
 // Хук для отслеживания времени чтения
-export const useReadingTracking = (pageName: string, sectionName: string, contentRef: React.RefObject<HTMLElement | null>) => {
+export const useReadingTracking = (
+  pageName: string,
+  sectionName: string,
+  contentRef: React.RefObject<HTMLElement | null>
+) => {
   const readingStartTimeRef = useRef(Date.now());
   const isInViewRef = useRef(false);
 
@@ -280,8 +371,9 @@ export const useReadingTracking = (pageName: string, sectionName: string, conten
           isInViewRef.current = false;
           const timeSpent = Date.now() - readingStartTimeRef.current;
           const contentLength = entry.target.textContent?.length || 0;
-          
-          if (timeSpent > 2000) { // Отслеживаем только если читали больше 2 секунд
+
+          if (timeSpent > 2000) {
+            // Отслеживаем только если читали больше 2 секунд
             trackReadingTime(pageName, sectionName, timeSpent, contentLength);
           }
         }
@@ -300,11 +392,11 @@ export const useReadingTracking = (pageName: string, sectionName: string, conten
 // Вспомогательные функции
 function getPageSection(): string {
   if (typeof window === 'undefined') return 'unknown';
-  
+
   const scrollTop = window.pageYOffset;
   const windowHeight = window.innerHeight;
   const documentHeight = document.documentElement.scrollHeight;
-  
+
   if (scrollTop < windowHeight) return 'hero';
   if (scrollTop < windowHeight * 2) return 'content';
   if (scrollTop < windowHeight * 3) return 'features';
@@ -315,11 +407,18 @@ function getPageSection(): string {
 
 function getViewedSections(): string[] {
   if (typeof window === 'undefined') return [];
-  
-  const sections = ['hero', 'content', 'features', 'pricing', 'testimonials', 'footer'];
+
+  const sections = [
+    'hero',
+    'content',
+    'features',
+    'pricing',
+    'testimonials',
+    'footer',
+  ];
   const scrollTop = window.pageYOffset;
   const windowHeight = window.innerHeight;
-  
+
   return sections.filter((_, index) => scrollTop >= windowHeight * index);
 }
 
@@ -329,4 +428,4 @@ declare global {
     dataLayer: unknown[];
     gtag: (...args: GtagArgs) => void;
   }
-} 
+}

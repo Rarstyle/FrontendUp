@@ -21,7 +21,7 @@ export default function SlotForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       // Простое сохранение в localStorage
       const slots = JSON.parse(localStorage.getItem('slots') || '[]');
@@ -32,11 +32,11 @@ export default function SlotForm() {
       };
       slots.push(newSlot);
       localStorage.setItem('slots', JSON.stringify(slots));
-      
+
       // Отслеживаем успешное создание теста
       trackTestCreation('ab_test');
       trackFormSubmission('slot_form', true);
-      
+
       router.push('/slots');
     } catch (error) {
       // Отслеживаем ошибку
@@ -45,7 +45,9 @@ export default function SlotForm() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -55,10 +57,13 @@ export default function SlotForm() {
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-6">Создать новый A/B-тест</h2>
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="title"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Название теста
           </label>
           <input
@@ -74,7 +79,10 @@ export default function SlotForm() {
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Описание
           </label>
           <textarea
@@ -89,7 +97,10 @@ export default function SlotForm() {
         </div>
 
         <div>
-          <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="budget"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Бюджет (руб.)
           </label>
           <input
