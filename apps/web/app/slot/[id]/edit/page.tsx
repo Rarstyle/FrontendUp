@@ -1,4 +1,3 @@
-import React from 'react';
 import EditSlotPageClient from './EditSlotPageClient';
 import { Metadata } from 'next';
 
@@ -13,8 +12,6 @@ export async function generateMetadata({
   };
 }
 
-const Page: React.FC<{ params: { id: string } }> = ({ params }) => {
+export default async function Page({ params }: { params: { id: string } }) {
   return <EditSlotPageClient />;
-};
-
-export default Page;
+}
