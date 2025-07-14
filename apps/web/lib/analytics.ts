@@ -16,7 +16,7 @@ export const initGA = () => {
     document.head.appendChild(script);
 
     window.dataLayer = window.dataLayer || [];
-    function gtag(...args: any[]) {
+    function gtag(...args: GtagArgs) {
       window.dataLayer.push(args);
     }
     gtag('js', new Date());
@@ -29,10 +29,33 @@ export const initGA = () => {
   }
 };
 
+// Type for gtag arguments
+export type GtagArgs =
+  | ['js', Date]
+  | ['config', string, Record<string, unknown>?]
+  | ['event', string, Record<string, unknown>?];
+
+// Interface for event parameters
+interface EventParams {
+  event_category: string;
+  event_label?: string;
+  value?: number;
+  timestamp: number;
+  user_agent: string;
+  screen_resolution: string;
+  [key: string]: unknown;
+}
+
 // Расширенное отслеживание событий
-export const trackEvent = (action: string, category: string, label?: string, value?: number, customParams?: Record<string, any>) => {
+export const trackEvent = (
+  action: string,
+  category: string,
+  label?: string,
+  value?: number,
+  customParams?: Record<string, unknown>
+) => {
   if (typeof window !== 'undefined' && window.gtag) {
-    const eventParams: any = {
+    const eventParams: EventParams = {
       event_category: category,
       event_label: label,
       value: value,
@@ -41,7 +64,6 @@ export const trackEvent = (action: string, category: string, label?: string, val
       screen_resolution: `${screen.width}x${screen.height}`,
       ...customParams,
     };
-
     window.gtag('event', action, eventParams);
     
     // Также отправляем в консоль для отладки
@@ -94,7 +116,11 @@ export const trackReadingTime = (page: string, section: string, timeSpent: numbe
 };
 
 // Отслеживание формы с деталями
-export const trackFormSubmission = (formName: string, success: boolean, formData?: Record<string, any>) => {
+export const trackFormSubmission = (
+  formName: string,
+  success: boolean,
+  formData?: Record<string, unknown>
+) => {
   trackEvent('form_submit', 'conversion', `${formName}_${success ? 'success' : 'error'}`, undefined, {
     form_fields_count: formData ? Object.keys(formData).length : 0,
     form_data: formData,
@@ -110,7 +136,10 @@ export const trackLogin = (method: 'email' | 'google', success: boolean, errorMe
 };
 
 // Отслеживание создания теста
-export const trackTestCreation = (testType: string, testConfig?: Record<string, any>) => {
+export const trackTestCreation = (
+  testType: string,
+  testConfig?: Record<string, unknown>
+) => {
   trackEvent('test_created', 'conversion', testType, undefined, {
     test_config: testConfig,
   });
@@ -297,7 +326,7 @@ function getViewedSections(): string[] {
 // Типы для TypeScript
 declare global {
   interface Window {
-    dataLayer: any[];
-    gtag: (...args: any[]) => void;
+    dataLayer: unknown[];
+    gtag: (...args: GtagArgs) => void;
   }
 } 
