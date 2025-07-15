@@ -2,231 +2,273 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid';
 
 interface Plan {
   name: string;
   description: string;
-  creatives: number | string;
-  price: { monthly: number; yearly: number };
+  price: {
+    monthly: number | string;
+    annually: number | string;
+  };
   features: string[];
-  popular: boolean;
-  color: string;
+  mostPopular: boolean;
+}
+
+const plans: Plan[] = [
+  {
+    name: 'Start',
+    description: 'Для ИП и самозанятых',
+    price: { monthly: 2900, annually: 29900 },
+    features: [
+      '20 креативов в месяц',
+      'A/B-тестирование',
+      'Поддержка VK Ads & Yandex Direct',
+      'Базовая аналитика',
+    ],
+    mostPopular: false,
+  },
+  {
+    name: 'Grow',
+    description: 'Для SMM-студий и малого бизнеса',
+    price: { monthly: 4990, annually: 49900 },
+    features: [
+      '50 креативов в месяц',
+      'Все, что в тарифе Start',
+      'Приоритетная поддержка',
+      'Расширенная аналитика',
+      'Доступ к API',
+    ],
+    mostPopular: true,
+  },
+  {
+    name: 'Scale',
+    description: 'Для растущих агентств',
+    price: { monthly: 7900, annually: 79900 },
+    features: [
+      '100 креативов в месяц',
+      'Все, что в тарифе Grow',
+      'Персональный менеджер',
+      'Помощь с интеграциями',
+    ],
+    mostPopular: false,
+  },
+  {
+    name: 'Enterprise',
+    description: 'Для крупных компаний',
+    price: { monthly: 'от\u00A040\u00A0000\u00A0₽', annually: 'Индивидуально' },
+    features: [
+      'Безлимитные креативы',
+      'Выделенная команда',
+      'Кастомные интеграции',
+      'SLA и обучение',
+    ],
+    mostPopular: false,
+  },
+];
+
+const faqs = [
+  {
+    q: 'Можно отменить в любой момент?',
+    a: 'Да, в любой момент в один клик из личного кабинета. Без скрытых условий.',
+  },
+  {
+    q: 'Ваш AI хранит мои данные?',
+    a: 'Мы храним только зашифрованные метаданные ваших кампаний для обучения AI. Доступа к вашим паролям и личной информации у нас нет.',
+  },
+  {
+    q: 'Какие способы оплаты вы принимаете?',
+    a: 'Мы принимаем все основные кредитные карты (Visa, MasterCard, Мир), а также оплату через СБП для юридических лиц.',
+  },
+  {
+    q: 'Как происходит возврат средств?',
+    a: 'Если вы не удовлетворены сервисом в течение первых 14 дней, мы вернем вам деньги.',
+  },
+];
+
+function classNames(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
 }
 
 export default function PricingPageClient() {
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>(
-    'monthly'
-  );
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annually'>('monthly');
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const plans: Plan[] = [
-    {
-      name: 'Start',
-      description: 'Для ИП и самозанятых',
-      creatives: 20,
-      price: { monthly: 2900, yearly: 26100 },
-      features: [
-        '20 креативов в месяц',
-        'A/B тестирование',
-        'Поддержка VK Ads и Яндекс Директ',
-        'Базовые аналитики',
-        'Email поддержка',
-      ],
-      popular: false,
-      color: 'from-blue-500 to-blue-600',
-    },
-    {
-      name: 'Grow',
-      description: 'Для SMM-студий',
-      creatives: 50,
-      price: { monthly: 4990, yearly: 44910 },
-      features: [
-        '50 креативов в месяц',
-        'Все функции Start',
-        'Приоритетная поддержка',
-        'Расширенная аналитика',
-        'API доступ',
-      ],
-      popular: true,
-      color: 'from-orange-500 to-orange-600',
-    },
-    {
-      name: 'Scale',
-      description: 'Для агентств',
-      creatives: 100,
-      price: { monthly: 7900, yearly: 71100 },
-      features: [
-        '100 креативов в месяц',
-        'Все функции Grow',
-        'Персональный менеджер',
-        'Индивидуальные интеграции',
-        'Обучение команды',
-      ],
-      popular: false,
-      color: 'from-purple-500 to-purple-600',
-    },
-    {
-      name: 'Enterprise',
-      description: 'Для крупных компаний',
-      creatives: 'Индивидуально',
-      price: { monthly: 40000, yearly: 360000 },
-      features: [
-        'Неограниченное количество креативов',
-        'SLA 24/7',
-        'Выделенный аккаунт-менеджер',
-        'Кастомные интеграции',
-        'Белый лейбл',
-      ],
-      popular: false,
-      color: 'from-gray-700 to-gray-800',
-    },
-  ];
-
-  const currentPrice = (plan: Plan) =>
-    billingPeriod === 'monthly' ? plan.price.monthly : plan.price.yearly;
-  const formatPrice = (price: number) => price.toLocaleString('ru-RU');
+  const formatPrice = (price: number | string) => {
+    if (typeof price === 'string') return price;
+    return price.toLocaleString('ru-RU');
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="bg-gray-50">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white py-20">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative max-w-6xl mx-auto px-5 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Выберите свой план
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 text-white py-20">
+        <div className="relative max-w-4xl mx-auto px-5 text-center">
+          <h1 className="text-4xl md:text-6xl font-extrabold mb-6">
+            Тарифы, которые растут вместе с вами
           </h1>
-          <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
-            От стартапов до крупных агентств — у нас есть решение для каждого
+          <p className="text-xl md:text-2xl mb-10 text-blue-100 max-w-3xl mx-auto">
+            Выберите план, который идеально подходит для ваших текущих задач, и
+            масштабируйтесь по мере роста вашего бизнеса.
           </p>
 
           {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-4 mb-8">
+          <div className="flex items-center justify-center gap-4">
             <span
-              className={`text-lg ${billingPeriod === 'monthly' ? 'text-white' : 'text-blue-200'}`}
+              className={`text-lg font-medium ${
+                billingPeriod === 'monthly' ? 'text-white' : 'text-blue-200'
+              }`}
             >
               Ежемесячно
             </span>
             <button
               onClick={() =>
                 setBillingPeriod(
-                  billingPeriod === 'monthly' ? 'yearly' : 'monthly'
+                  billingPeriod === 'monthly' ? 'annually' : 'monthly'
                 )
               }
-              className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors ${
-                billingPeriod === 'yearly' ? 'bg-white' : 'bg-blue-200'
-              }`}
+              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors bg-white/30`}
             >
               <span
-                className={`inline-block h-6 w-6 transform rounded-full bg-blue-600 transition-transform ${
-                  billingPeriod === 'yearly' ? 'translate-x-9' : 'translate-x-1'
+                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                  billingPeriod === 'annually'
+                    ? 'translate-x-6'
+                    : 'translate-x-1'
                 }`}
               />
             </button>
             <span
-              className={`text-lg ${billingPeriod === 'yearly' ? 'text-white' : 'text-blue-200'}`}
+              className={`text-lg font-medium ${
+                billingPeriod === 'annually' ? 'text-white' : 'text-blue-200'
+              }`}
             >
               Ежегодно
-              <span className="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                -10%
+              <span className="ml-2 bg-green-200 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                скидка 20%
               </span>
             </span>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Pricing Cards */}
-      <div className="max-w-7xl mx-auto px-5 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-5 py-16 sm:py-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 ${
-                plan.popular ? 'ring-2 ring-orange-500 scale-105' : ''
-              }`}
+              className={classNames(
+                plan.mostPopular
+                  ? 'ring-2 ring-orange-500 scale-105'
+                  : 'ring-1 ring-gray-200',
+                'relative rounded-3xl px-6 pt-6 pb-8 bg-white shadow-lg flex flex-col transition-transform transform hover:scale-105'
+              )}
             >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+              {plan.mostPopular && (
+                <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2">
+                  <span className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1 text-sm font-semibold rounded-full shadow-md">
                     Популярный
                   </span>
                 </div>
               )}
-
-              <div className="p-8">
-                {/* Plan Header */}
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                    {plan.name}
-                  </h3>
-                  <p className="text-gray-600 mb-4">{plan.description}</p>
-
-                  {/* Price */}
-                  <div className="mb-6">
-                    {typeof plan.creatives === 'number' ? (
-                      <div className="text-4xl font-bold text-gray-900 mb-2">
-                        {formatPrice(currentPrice(plan))} ₽
-                        <span className="text-lg text-gray-500 font-normal">
-                          /{billingPeriod === 'monthly' ? 'мес' : 'год'}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="text-4xl font-bold text-gray-900 mb-2">
-                        от {formatPrice(currentPrice(plan))} ₽
-                        <span className="text-lg text-gray-500 font-normal">
-                          /{billingPeriod === 'monthly' ? 'мес' : 'год'}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="text-sm text-gray-500">
-                      {typeof plan.creatives === 'number'
-                        ? `${plan.creatives} креативов`
-                        : plan.creatives}
-                    </div>
-                  </div>
+              <h3 className="text-xl font-semibold leading-8 text-gray-900 text-center">
+                {plan.name}
+              </h3>
+              <p className="mt-4 text-base leading-6 text-gray-600 text-center">
+                {plan.description}
+              </p>
+              <p className="mt-7 flex items-baseline gap-x-1 justify-center">
+                <span className={`${plan.name === 'Enterprise' ? 'text-3xl' : 'text-4xl'} font-bold tracking-tight text-gray-900 whitespace-nowrap`}>
+                  {formatPrice(plan.price[billingPeriod])}
+                </span>
+                <span className="text-base font-semibold leading-6 text-gray-600">
+                  {plan.name !== 'Enterprise' && ` / ${billingPeriod === 'monthly' ? 'мес' : 'год'}`}
+                </span>
+              </p>
+              {billingPeriod === 'annually' && plan.name !== 'Free' && (
+                <div className="mt-3 text-center">
+                  <p className="text-sm text-gray-400">Скидка 20% уже включена в годовые тарифы.</p>
                 </div>
-
-                {/* Features */}
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start">
-                      <svg
-                        className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      <span className="text-gray-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* CTA Button */}
-                <Link
-                  href={
-                    plan.name === 'Enterprise'
-                      ? '/about'
-                      : `/payment?plan=${plan.name}&billing=${billingPeriod}`
-                  }
-                  className={`w-full block text-center py-3 px-6 rounded-xl font-medium transition-all duration-200 ${
-                    plan.popular
-                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl'
-                      : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-900 hover:from-gray-200 hover:to-gray-300'
-                  }`}
-                >
-                  {plan.name === 'Enterprise'
-                    ? 'Связаться с нами'
-                    : 'Выбрать план'}
-                </Link>
-              </div>
+              )}
+              {plan.name !== 'Enterprise' && (
+                <p className="text-sm text-gray-500 mt-1 text-center">
+                  {plan.name === 'Start' ? '20 креативов' : 
+                   plan.name === 'Grow' ? '50 креативов' : 
+                   plan.name === 'Scale' ? '100 креативов' : ''}
+                </p>
+              )}
+              {plan.name === 'Enterprise' && (
+                <p className="text-sm text-gray-500 mt-1 text-center">
+                  Безлимитные креативы
+                </p>
+              )}
+              <ul
+                role="list"
+                className="mt-9 space-y-4 text-base leading-6 text-gray-700 flex-1 w-full"
+              >
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex justify-center">
+                    <div className="flex items-center w-[85%] mx-auto">
+                      <CheckIcon
+                        className="h-5 w-5 flex-none text-blue-600 mr-2"
+                        aria-hidden="true"
+                      />
+                      <span>{feature}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href={plan.name === 'Enterprise' ? '/about' : `/payment?plan=${plan.name}&billing=${billingPeriod}`}
+                aria-describedby={plan.name}
+                className={classNames(
+                  plan.mostPopular
+                    ? 'bg-orange-500 text-white shadow-md hover:bg-orange-600'
+                    : 'text-blue-600 ring-1 ring-inset ring-blue-200 hover:ring-blue-300',
+                  'mt-8 block rounded-md py-2.5 px-4 text-center text-base font-semibold leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
+                )}
+              >
+                {plan.name === 'Enterprise' ? 'Связаться с нами' : 'Выбрать план'}
+              </Link>
             </div>
           ))}
         </div>
       </div>
+
+      {/* FAQ Section */}
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="max-w-3xl mx-auto px-5">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Часто задаваемые вопросы
+            </h2>
+          </div>
+          <div className="space-y-4">
+            {faqs.map((faq, i) => (
+              <div key={i} className="bg-gray-50 rounded-lg">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex justify-between items-center text-left p-5"
+                >
+                  <p className="font-semibold text-lg text-gray-900">{faq.q}</p>
+                  <ChevronDownIcon
+                    className={`w-6 h-6 text-gray-500 transition-transform duration-300 ${
+                      openFaq === i ? 'transform rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                <div
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                    openFaq === i ? 'max-h-96' : 'max-h-0'
+                  }`}
+                >
+                  <p className="px-5 pb-5 text-gray-700">{faq.a}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

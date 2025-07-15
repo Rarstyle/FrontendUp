@@ -2,10 +2,6 @@
 
 import { Inter } from 'next/font/google';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { auth } from '../lib/firebase';
-import { onAuthStateChanged, User, signOut } from 'firebase/auth';
-import { usePathname } from 'next/navigation';
 import '@/shared/styles/globals.css';
 
 const inter = Inter({
@@ -19,76 +15,39 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUser] = useState<User | null>(null);
-  const pathname = usePathname();
-
-  useEffect(() => {
-    if (!auth) {
-      return;
-    }
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleSignOut = async () => {
-    if (!auth) {
-      return;
-    }
-
-    try {
-      await signOut(auth);
-      // Пользователь будет автоматически перенаправлен на главную страницу
-    } catch (error) {
-      console.error('Ошибка при выходе:', error);
-    }
-  };
-
-  // Проверяем, находится ли пользователь в личном кабинете
-  const isInDashboard =
-    pathname?.startsWith('/slots') || pathname?.startsWith('/slot/');
-
   return (
     <html lang="ru" className={inter.className}>
-      <body className="min-h-screen flex flex-col">
+      <body className="min-h-screen flex flex-col bg-gray-50">
         {/* Шапка сайта */}
-        <header className="bg-gray-50 text-gray-900">
-          <div className="max-w-6xl mx-auto flex items-center justify-between py-4 px-5">
+        <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-200">
+          <div className="max-w-6xl mx-auto flex items-center justify-between py-3 px-5">
             {/* Логотип / бренд */}
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center space-x-2">
-                {/* <Image src="/logo.png" alt="Logo" width={32} height={32} /> */}
-                <span className="font-bold text-lg">NeuroAd</span>
-              </Link>
-            </div>
-            {/* Навигационные ссылки */}
+            <Link href="/" className="flex items-center space-x-2">
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                NeuroAd
+              </span>
+            </Link>
+
+            {/* Навигационные ссылки и CTA */}
             <nav className="flex items-center gap-6">
-              <Link href="/" className="hover:underline">
+              <Link
+                href="/"
+                className="hidden sm:block text-gray-600 font-medium hover:text-blue-600 transition-colors"
+              >
                 Главная
               </Link>
-              <Link href="/about" className="hover:underline">
+              <Link
+                href="/about"
+                className="text-gray-600 font-medium hover:text-blue-600 transition-colors"
+              >
                 О нас
               </Link>
-              <Link href="/pricing" className="hover:underline">
+              <Link
+                href="/pricing"
+                className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition-all shadow-sm"
+              >
                 Тарифы
               </Link>
-              {/* Если пользователь залогинен – показываем ссылку в кабинет, иначе – вход/регистрация */}
-              {user && (
-                <Link href="/slots" className="hover:underline">
-                  Кабинет
-                </Link>
-              )}
-              {/* Кнопка выхода появляется только в кабинете */}
-              {user && isInDashboard && (
-                <button
-                  onClick={handleSignOut}
-                  className="text-gray-600 hover:text-gray-900 hover:underline"
-                >
-                  Выйти
-                </button>
-              )}
             </nav>
           </div>
         </header>
