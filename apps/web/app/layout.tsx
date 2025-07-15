@@ -11,6 +11,10 @@ const inter = Inter({
   fallback: ['system-ui', 'sans-serif'],
 });
 
+export const metadata = {
+  metadataBase: new URL('https://neuroad.tech'),
+};
+
 export default function RootLayout({
   children,
 }: {
