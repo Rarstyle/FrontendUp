@@ -2,6 +2,7 @@
 
 import { Inter } from 'next/font/google';
 import Link from 'next/link';
+import Script from 'next/script';
 import '@/shared/styles/globals.css';
 
 const inter = Inter({
@@ -17,6 +18,31 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru" className={inter.className}>
+      <head>
+        {/* Microsoft Clarity */}
+        <Script id="clarity-script" strategy="afterInteractive">
+          {`
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "sf1va8vj8r");
+        `}
+        </Script>
+        {/* Google Analytics */}
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-3CRXRB8F5K"
+        />
+        <Script id="google-analytics-inline" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-3CRXRB8F5K');
+        `}
+        </Script>
+      </head>
       <body className="min-h-screen flex flex-col bg-gray-50">
         {/* Шапка сайта */}
         <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-200">
