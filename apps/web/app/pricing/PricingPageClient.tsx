@@ -4,6 +4,12 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid';
 
+declare global {
+  interface Window {
+    ym: (id: number, type: string, goalName: string) => void;
+  }
+}
+
 interface Plan {
   name: string;
   description: string;
@@ -93,6 +99,12 @@ function classNames(...classes: (string | boolean | undefined)[]) {
 export default function PricingPageClient() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annually'>('monthly');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const handlePlanSelect = () => {
+    if (typeof window.ym === 'function') {
+      window.ym(103343970, 'reachGoal', 'CLICK_PAY');
+    }
+  };
 
   const formatPrice = (price: number | string) => {
     if (typeof price === 'string') return price;
@@ -221,6 +233,7 @@ export default function PricingPageClient() {
               <Link
                 href={plan.name === 'Enterprise' ? '/about' : `/payment?plan=${plan.name}&billing=${billingPeriod}`}
                 aria-describedby={plan.name}
+                onClick={plan.name !== 'Enterprise' ? handlePlanSelect : undefined}
                 className={classNames(
                   plan.mostPopular
                     ? 'bg-orange-500 text-white shadow-md hover:bg-orange-600'
